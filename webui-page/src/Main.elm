@@ -2,6 +2,7 @@ module Main exposing (..)
 
 import Browser
 import Element exposing (..)
+import Element.Border as Border
 import Element.Input as Input
 import Http
 import Json.Decode as D
@@ -10,6 +11,8 @@ import Json.Decode as D
 type Msg
     = Sent (Result Http.Error D.Value)
     | TogglePause
+    | SeekBack
+    | SeekForward
 
 
 main : Program () () Msg
@@ -25,17 +28,24 @@ main =
 view _ =
     { title = "Title"
     , body =
-        [ Element.layout []
-            (column []
-                [ text "Hello"
-                , Input.button []
-                    { onPress = Just TogglePause
-                    , label = text "play/pause"
-                    }
+        [ Element.layout [ padding 20 ]
+            (column [ width fill, spacing 20 ]
+                [ button (Just TogglePause) "|> / ||"
+                , row [ spacing 20, width fill ]
+                    [ button (Just SeekBack) "<<"
+                    , button (Just SeekForward) ">>"
+                    ]
                 ]
             )
         ]
     }
+
+
+button onPress text_ =
+    Input.button [ Border.color (rgb255 0 0 0), Border.width 2, Border.rounded 6, padding 10, width fill ]
+        { onPress = onPress
+        , label = el [ centerX ] (text text_)
+        }
 
 
 update msg model =
@@ -45,6 +55,12 @@ update msg model =
 
         TogglePause ->
             ( model, send "toggle_pause" )
+
+        SeekBack ->
+            ( model, send "seek/-10" )
+
+        SeekForward ->
+            ( model, send "seek/10" )
 
 
 send command =
