@@ -3,6 +3,7 @@ module Main exposing (..)
 import Browser
 import Element exposing (..)
 import Element.Border as Border
+import Element.Font as Font
 import Element.Input as Input
 import Http
 import Json.Decode as D
@@ -57,7 +58,15 @@ focusStyle_ =
 
 
 button onPress text_ =
-    Input.button [ Border.color (rgb255 0 0 0), Border.width 2, Border.rounded 6, padding 10, width fill ]
+    Input.button
+        [ Border.color (rgb255 0 0 0)
+        , Border.width 2
+        , Border.rounded 6
+        , padding 10
+        , width fill
+        , height (px 160)
+        , Font.size 60
+        ]
         { onPress = onPress
         , label = el [ centerX ] (text text_)
         }
