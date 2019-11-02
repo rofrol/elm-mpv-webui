@@ -1,18 +1,22 @@
 module Main exposing (..)
 
 import Browser
+import Browser.Dom
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
+import Html.Attributes
 import Html.Events
 import Http
 import Json.Decode as D exposing (Decoder)
+import Task
 
 
 type alias Model =
-    { slider : Int
+    { position : Int
+    , maybePositionElement : Maybe Browser.Dom.Element
     }
 
 
@@ -24,21 +28,31 @@ type Msg
     | PlaylistPrev
     | PlaylistNext
     | ClickMsg Coords
+    | GetPositionElement (Result Browser.Dom.Error Browser.Dom.Element)
 
 
 main : Program () Model Msg
 main =
     Browser.document
-        { init = \_ -> ( initialModel, Cmd.none )
+        { init = init
         , view = view
         , update = update
         , subscriptions = subscriptions
         }
 
 
+init _ =
+    ( initialModel
+    , Cmd.batch
+        [ Task.attempt GetPositionElement (Browser.Dom.getElement "position")
+        ]
+    )
+
+
 initialModel : Model
 initialModel =
-    { slider = 0
+    { position = 0
+    , maybePositionElement = Nothing
     }
 
 
@@ -48,7 +62,7 @@ view model =
         [ Element.layoutWith { options = [ focusStyle focusStyle_ ] }
             [ padding 20 ]
             (column [ width fill, spacing 20 ]
-                [ slider model.slider ClickMsg
+                [ slider "position" ClickMsg model.maybePositionElement model.position
                 , button (Just TogglePause) "|> / ||"
                 , row [ spacing 20, width fill ]
                     [ button (Just SeekBack) "<<"
@@ -87,8 +101,18 @@ button onPress text_ =
         }
 
 
-slider value msg =
-    el [ width fill ]
+slider : String -> (Coords -> Msg) -> Maybe Browser.Dom.Element -> Int -> Element Msg
+slider id msg maybePositionElement position =
+    let
+        value =
+            case maybePositionElement of
+                Just element ->
+                    round (toFloat position / 100 * element.element.width)
+
+                Nothing ->
+                    0
+    in
+    el [ Html.Attributes.id id |> Element.htmlAttribute, width fill ]
         (el
             [ onClickCoords msg
             , width fill
@@ -146,7 +170,19 @@ update msg model =
             ( model, send "playlist_next" )
 
         ClickMsg coords ->
-            ( { model | slider = coords.x }, Cmd.none )
+            let
+                position =
+                    case model.maybePositionElement of
+                        Just element ->
+                            round <| 100 * toFloat coords.x / element.element.width
+
+                        Nothing ->
+                            0
+            in
+            ( { model | position = position }, Cmd.none )
+
+        GetPositionElement result ->
+            ( { model | maybePositionElement = Result.toMaybe result }, Cmd.none )
 
 
 send command =
