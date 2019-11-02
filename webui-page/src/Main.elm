@@ -13,6 +13,8 @@ type Msg
     | TogglePause
     | SeekBack
     | SeekForward
+    | PlaylistPrev
+    | PlaylistNext
 
 
 main : Program () () Msg
@@ -34,6 +36,10 @@ view _ =
                 , row [ spacing 20, width fill ]
                     [ button (Just SeekBack) "<<"
                     , button (Just SeekForward) ">>"
+                    ]
+                , row [ spacing 20, width fill ]
+                    [ button (Just PlaylistPrev) "|<<"
+                    , button (Just PlaylistNext) ">>|"
                     ]
                 ]
             )
@@ -61,6 +67,12 @@ update msg model =
 
         SeekForward ->
             ( model, send "seek/10" )
+
+        PlaylistPrev ->
+            ( model, send "playlist_prev" )
+
+        PlaylistNext ->
+            ( model, send "playlist_next" )
 
 
 send command =
