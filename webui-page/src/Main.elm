@@ -9,7 +9,7 @@ import Json.Decode as D
 
 type Msg
     = Sent (Result Http.Error D.Value)
-    | PlayPause
+    | TogglePause
 
 
 main : Program () () Msg
@@ -29,7 +29,7 @@ view _ =
             (column []
                 [ text "Hello"
                 , Input.button []
-                    { onPress = Just PlayPause
+                    { onPress = Just TogglePause
                     , label = text "play/pause"
                     }
                 ]
@@ -43,13 +43,13 @@ update msg model =
         Sent _ ->
             ( model, Cmd.none )
 
-        PlayPause ->
-            ( model, playPause )
+        TogglePause ->
+            ( model, send "toggle_pause" )
 
 
-playPause =
+send command =
     Http.post
-        { url = "http://192.168.0.10:8080/api/toggle_pause"
+        { url = "http://192.168.0.10:8080/api/" ++ command
         , body = Http.emptyBody
         , expect = Http.expectJson Sent D.value
         }
