@@ -30,7 +30,8 @@ main =
 view _ =
     { title = "Title"
     , body =
-        [ Element.layout [ padding 20 ]
+        [ Element.layoutWith { options = [ focusStyle focusStyle_ ] }
+            [ padding 20 ]
             (column [ width fill, spacing 20 ]
                 [ button (Just TogglePause) "|> / ||"
                 , row [ spacing 20, width fill ]
@@ -44,6 +45,14 @@ view _ =
                 ]
             )
         ]
+    }
+
+
+focusStyle_ : FocusStyle
+focusStyle_ =
+    { borderColor = Nothing
+    , backgroundColor = Nothing
+    , shadow = Nothing
     }
 
 
