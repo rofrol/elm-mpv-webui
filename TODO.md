@@ -10,3 +10,4 @@
 - [x] extract slider to separate module
 - [ ] save settings like selected theme in localStorage
 - [ ] add audio loop
+- [ ] disable position slider until click for some time
