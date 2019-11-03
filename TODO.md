@@ -8,3 +8,4 @@
 - [ ] add second rewind for ufc
 - [ ] use readyModel for getting element?
 - [ ] extract slider to separate module
+- [ ] save settings like selected theme in localStorage
