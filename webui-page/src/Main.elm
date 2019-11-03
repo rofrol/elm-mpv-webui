@@ -314,7 +314,9 @@ update msg model =
                                 Nothing ->
                                     0
                     in
-                    ( { model | positionPointerDown = True, position = position }, send ("set_position/" ++ String.fromFloat ((toFloat position / 100) * toFloat model.status.duration)) )
+                    ( { model | positionPointerDown = True, position = position }
+                    , send ("set_position/" ++ String.fromFloat ((toFloat position / 100) * toFloat model.status.duration))
+                    )
 
                 Slider.PointerMoveMsg coords ->
                     let
@@ -326,7 +328,9 @@ update msg model =
                                 Nothing ->
                                     0
                     in
-                    ( { model | position = position }, send ("set_position/" ++ String.fromFloat ((toFloat position / 100) * toFloat model.status.duration)) )
+                    ( { model | position = position }
+                    , send ("set_position/" ++ String.fromFloat ((toFloat position / 100) * toFloat model.status.duration))
+                    )
 
                 Slider.PointerUpMsg ->
                     ( { model | positionPointerDown = False }, Cmd.none )
@@ -343,7 +347,9 @@ update msg model =
                                 Nothing ->
                                     0
                     in
-                    ( { model | volumePointerDown = True, volume = volume }, send ("set_volume/" ++ String.fromFloat ((toFloat volume / 100) * toFloat model.status.volumeMax)) )
+                    ( { model | volumePointerDown = True, volume = volume }
+                    , send ("set_volume/" ++ String.fromFloat ((toFloat volume / 100) * toFloat model.status.volumeMax))
+                    )
 
                 Slider.PointerMoveMsg coords ->
                     let
@@ -355,7 +361,9 @@ update msg model =
                                 Nothing ->
                                     0
                     in
-                    ( { model | volume = volume }, send ("set_volume/" ++ String.fromFloat ((toFloat volume / 100) * toFloat model.status.volumeMax)) )
+                    ( { model | volume = volume }
+                    , send ("set_volume/" ++ String.fromFloat ((toFloat volume / 100) * toFloat model.status.volumeMax))
+                    )
 
                 Slider.PointerUpMsg ->
                     ( { model | volumePointerDown = False }, Cmd.none )
