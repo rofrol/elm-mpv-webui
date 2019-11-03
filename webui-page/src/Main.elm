@@ -493,8 +493,15 @@ update msg model =
         GetVolumeElement result ->
             ( { model | maybeVolumeElement = Result.toMaybe result }, Cmd.none )
 
-        GotStatus (Ok status) ->
+        GotStatus (Ok newStatus) ->
             let
+                status =
+                    if model.volumePointerDown then
+                        { newStatus | volume = round ((toFloat model.volume / 100) * toFloat newStatus.volumeMax) }
+
+                    else
+                        newStatus
+
                 { subsSelected, subsCount, audiosSelected, audiosCount } =
                     List.foldl
                         (\{ id, type_, selected } acc ->
