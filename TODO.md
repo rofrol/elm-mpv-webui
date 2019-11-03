@@ -1,5 +1,5 @@
 - [ ] click/touch feedback on buttons: change color when clicked?
-- [ ] get status every second
+- [x] get status every second
 - [ ] add all remaining functionality
 - [ ] get data through websockets: proxy rust server?
 - [ ] colorful theme

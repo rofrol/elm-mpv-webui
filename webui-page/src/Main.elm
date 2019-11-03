@@ -11,9 +11,10 @@ import FontAwesome.Icon as Icon
 import FontAwesome.Solid as Icon
 import Html.Attributes
 import Http
-import Json.Decode as D exposing (Decoder)
+import Json.Decode as D
 import Slider
 import Task
+import Time
 import Types exposing (..)
 
 
@@ -43,6 +44,7 @@ type Msg
     | GetVolumeElement (Result Browser.Dom.Error Browser.Dom.Element)
     | GotStatus (Result Http.Error Status)
     | ToggleDark
+    | Tick Time.Posix
 
 
 main : Program () Model Msg
@@ -325,6 +327,9 @@ update msg model =
             , Cmd.none
             )
 
+        Tick _ ->
+            ( model, getStatus )
+
 
 send command =
     Http.post
@@ -361,4 +366,4 @@ statusDecoder =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Sub.none
+    Time.every 1000 Tick
