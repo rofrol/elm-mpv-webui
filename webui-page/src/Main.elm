@@ -29,6 +29,7 @@ type Msg
     | PlaylistNext
     | ClickMsg Coords
     | GetPositionElement (Result Browser.Dom.Error Browser.Dom.Element)
+    | GotStatus (Result Http.Error Status)
 
 
 main : Program () Model Msg
@@ -45,6 +46,7 @@ init _ =
     ( initialModel
     , Cmd.batch
         [ Task.attempt GetPositionElement (Browser.Dom.getElement "position")
+        , getStatus
         ]
     )
 
@@ -198,6 +200,12 @@ update msg model =
         GetPositionElement result ->
             ( { model | maybePositionElement = Result.toMaybe result }, Cmd.none )
 
+        GotStatus (Ok status) ->
+            ( { model | position = round (100 * toFloat status.position / toFloat status.duration) }, Cmd.none )
+
+        GotStatus (Err err) ->
+            ( model, Cmd.none )
+
 
 send command =
     Http.post
@@ -205,6 +213,25 @@ send command =
         , body = Http.emptyBody
         , expect = Http.expectJson Sent D.value
         }
+
+
+getStatus =
+    Http.get
+        { url = "http://192.168.0.10:8080/api/status"
+        , expect = Http.expectJson GotStatus statusDecoder
+        }
+
+
+type alias Status =
+    { duration : Int
+    , position : Int
+    }
+
+
+statusDecoder =
+    D.map2 Status
+        (D.field "duration" D.int)
+        (D.field "position" D.int)
 
 
 subscriptions : Model -> Sub Msg
