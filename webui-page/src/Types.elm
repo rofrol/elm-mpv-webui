@@ -28,11 +28,12 @@ type alias Status =
     , volumeMax : Int
     , filename : String
     , subDelay : Int
+    , audioDelay : Int
     }
 
 
 statusDecoder =
-    D.map7 Status
+    D.map8 Status
         (D.field "duration" D.int)
         (D.field "position" D.int)
         (D.field "pause" D.bool)
@@ -40,3 +41,16 @@ statusDecoder =
         (D.field "volume-max" D.int)
         (D.field "filename" D.string)
         (D.field "sub-delay" D.int)
+        (D.field "audio-delay" D.int)
+
+
+initStatus =
+    { duration = 0
+    , position = 0
+    , pause = True
+    , volume = 0
+    , volumeMax = 0
+    , filename = ""
+    , subDelay = 0
+    , audioDelay = 0
+    }

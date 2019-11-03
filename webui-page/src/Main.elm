@@ -77,15 +77,7 @@ volumeId =
 
 initialModel : Model
 initialModel =
-    { status =
-        { duration = 0
-        , position = 0
-        , pause = True
-        , volume = 0
-        , volumeMax = 0
-        , filename = ""
-        , subDelay = 0
-        }
+    { status = initStatus
     , position = 0
     , maybePositionElement = Nothing
     , positionPointerDown = False
@@ -114,6 +106,11 @@ view model =
                     , Font.size 30
                     ]
                     (text ("Sub-delay: " ++ String.fromInt model.status.subDelay ++ " ms"))
+                , el
+                    [ Font.color model.style.color
+                    , Font.size 30
+                    ]
+                    (text ("Audio-delay: " ++ String.fromInt model.status.audioDelay ++ " ms"))
                 , Slider.view positionId
                     model.positionPointerDown
                     model.style
