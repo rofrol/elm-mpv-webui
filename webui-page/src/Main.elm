@@ -5,7 +5,6 @@ import Browser.Dom
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
-import Element.Events as Events
 import Element.Font as Font
 import Element.Input as Input
 import FontAwesome.Icon as Icon
@@ -23,7 +22,7 @@ type alias Model =
     , status : Status
     , dark : Bool
     , style : Style
-    , mouseDown : Bool
+    , pointerDown : Bool
     }
 
 
@@ -34,9 +33,9 @@ type Msg
     | SeekForward
     | PlaylistPrev
     | PlaylistNext
-    | MouseDownMsg Coords
-    | MouseMoveMsg Coords
-    | MouseUpMsg
+    | PointerDownMsg Coords
+    | PointerMoveMsg Coords
+    | PointerUpMsg
     | GetPositionElement (Result Browser.Dom.Error Browser.Dom.Element)
     | GotStatus (Result Http.Error Status)
     | ToggleDark
@@ -68,7 +67,7 @@ initialModel =
     , status = { duration = 0, position = 0, pause = True }
     , dark = True
     , style = styleDark
-    , mouseDown = False
+    , pointerDown = False
     }
 
 
@@ -78,7 +77,14 @@ view model =
         [ Element.layoutWith { options = [ focusStyle focusStyle_ ] }
             [ padding 40, Background.color model.style.backgroundColor ]
             (column [ width fill, spacing 20 ]
-                [ slider "position" model.mouseDown MouseDownMsg MouseMoveMsg MouseUpMsg model.style model.maybePositionElement model.position
+                [ slider "position"
+                    model.pointerDown
+                    PointerDownMsg
+                    PointerMoveMsg
+                    PointerUpMsg
+                    model.style
+                    model.maybePositionElement
+                    model.position
                 , button (Just TogglePause)
                     model.style
                     (icon model.style
@@ -184,7 +190,7 @@ button onPress style element =
 
 
 slider : String -> Bool -> (Coords -> Msg) -> (Coords -> Msg) -> Msg -> Style -> Maybe Browser.Dom.Element -> Int -> Element Msg
-slider id mouseDown mouseDownMsg mouseMoveMsg mouseUpMsg style maybePositionElement position =
+slider id pointerDown pointerDownMsg pointerMoveMsg touchEndMsg style maybePositionElement position =
     let
         value : Int
         value =
@@ -195,15 +201,15 @@ slider id mouseDown mouseDownMsg mouseMoveMsg mouseUpMsg style maybePositionElem
                 Nothing ->
                     0
 
-        mouseAttrs =
+        pointerAttrs =
             List.concat
-                [ if mouseDown then
-                    [ onMouseMoveCoords mouseMoveMsg
-                    , Events.onMouseUp mouseUpMsg
+                [ if pointerDown then
+                    [ onPointerMoveCoords pointerMoveMsg
+                    , onPointerUpCoords touchEndMsg
                     ]
 
                   else
-                    [ onMouseDownCoords mouseDownMsg ]
+                    [ onPointerDownCoords pointerDownMsg ]
                 ]
     in
     el
@@ -218,7 +224,7 @@ slider id mouseDown mouseDownMsg mouseMoveMsg mouseUpMsg style maybePositionElem
                 ([ width fill
                  , height fill
                  ]
-                    ++ mouseAttrs
+                    ++ pointerAttrs
                 )
                 (el
                     [ width (px value)
@@ -231,14 +237,19 @@ slider id mouseDown mouseDownMsg mouseMoveMsg mouseUpMsg style maybePositionElem
         )
 
 
-onMouseDownCoords : (Coords -> msg) -> Attribute msg
-onMouseDownCoords msg =
-    Html.Events.on "mousedown" (D.map msg localCoords) |> Element.htmlAttribute
+onPointerDownCoords : (Coords -> msg) -> Attribute msg
+onPointerDownCoords msg =
+    Html.Events.on "pointerdown" (D.map msg localCoords) |> Element.htmlAttribute
 
 
-onMouseMoveCoords : (Coords -> msg) -> Attribute msg
-onMouseMoveCoords msg =
-    Html.Events.on "mousemove" (D.map msg localCoords) |> Element.htmlAttribute
+onPointerMoveCoords : (Coords -> msg) -> Attribute msg
+onPointerMoveCoords msg =
+    Html.Events.on "pointermove" (D.map msg localCoords) |> Element.htmlAttribute
+
+
+onPointerUpCoords : msg -> Attribute msg
+onPointerUpCoords msg =
+    Html.Events.on "pointerup" (D.succeed msg) |> Element.htmlAttribute
 
 
 type alias Coords =
@@ -281,7 +292,7 @@ update msg model =
         PlaylistNext ->
             ( model, send "playlist_next" )
 
-        MouseDownMsg coords ->
+        PointerDownMsg coords ->
             let
                 position =
                     case model.maybePositionElement of
@@ -291,9 +302,9 @@ update msg model =
                         Nothing ->
                             0
             in
-            ( { model | mouseDown = True, position = position }, send ("set_position/" ++ String.fromFloat ((toFloat position / 100) * toFloat model.status.duration)) )
+            ( { model | pointerDown = True, position = position }, send ("set_position/" ++ String.fromFloat ((toFloat position / 100) * toFloat model.status.duration)) )
 
-        MouseMoveMsg coords ->
+        PointerMoveMsg coords ->
             let
                 position =
                     case model.maybePositionElement of
@@ -305,8 +316,8 @@ update msg model =
             in
             ( { model | position = position }, send ("set_position/" ++ String.fromFloat ((toFloat position / 100) * toFloat model.status.duration)) )
 
-        MouseUpMsg ->
-            ( { model | mouseDown = False }, Cmd.none )
+        PointerUpMsg ->
+            ( { model | pointerDown = False }, Cmd.none )
 
         GetPositionElement result ->
             ( { model | maybePositionElement = Result.toMaybe result }, Cmd.none )
