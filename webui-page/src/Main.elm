@@ -28,6 +28,10 @@ type alias Model =
     , volumePointerDown : Bool
     , dark : Bool
     , style : Style
+    , subsSelected : Int
+    , subsCount : Int
+    , audiosSelected : Int
+    , audiosCount : Int
     }
 
 
@@ -40,6 +44,8 @@ type Msg
     | ChapterNext
     | PlaylistPrev
     | PlaylistNext
+    | SubNext
+    | AudioNext
     | PositionMsg Slider.Msg
     | VolumeMsg Slider.Msg
     | GetPositionElement (Result Browser.Dom.Error Browser.Dom.Element)
@@ -88,6 +94,10 @@ initialModel =
     , volumePointerDown = False
     , dark = True
     , style = styleDark
+    , subsSelected = 0
+    , subsCount = 0
+    , audiosSelected = 0
+    , audiosCount = 0
     }
 
 
@@ -208,6 +218,14 @@ view model =
                         model.style
                         (icon model.style Icon.fastForward)
                     ]
+                , row [ spacing 20, width fill ]
+                    [ buttonText (Just SubNext)
+                        model.style
+                        (text ("Next sub " ++ String.fromInt model.subsSelected ++ "/" ++ String.fromInt model.subsCount))
+                    , buttonText (Just AudioNext)
+                        model.style
+                        (text ("Next audio " ++ String.fromInt model.audiosSelected ++ "/" ++ String.fromInt model.audiosCount))
+                    ]
                 , button (Just ToggleDark)
                     model.style
                     (icon model.style Icon.adjust)
@@ -278,6 +296,22 @@ button onPress style element =
         }
 
 
+buttonText onPress style element =
+    Input.button
+        [ Border.color style.borderColor
+        , Border.width style.borderWidth
+        , Border.rounded style.borderRounded
+        , Background.color style.backgroundColor
+        , padding 10
+        , width fill
+        , height style.buttonHeight
+        , Font.size 60
+        ]
+        { onPress = onPress
+        , label = el [ width fill, Font.center, Font.color style.color, Font.bold ] element
+        }
+
+
 formatTime seconds =
     let
         hour =
@@ -317,6 +351,12 @@ update msg model =
 
         PlaylistNext ->
             ( model, send "playlist_next" )
+
+        SubNext ->
+            ( model, send "cycle_sub" )
+
+        AudioNext ->
+            ( model, send "cycle_audio" )
 
         PositionMsg subMsg ->
             case subMsg of
@@ -391,10 +431,48 @@ update msg model =
             ( { model | maybeVolumeElement = Result.toMaybe result }, Cmd.none )
 
         GotStatus (Ok status) ->
+            let
+                { subsSelected, subsCount, audiosSelected, audiosCount } =
+                    List.foldl
+                        (\{ id, type_, selected } acc ->
+                            if type_ == "sub" then
+                                { subsSelected =
+                                    if selected then
+                                        id
+
+                                    else
+                                        acc.subsSelected
+                                , subsCount = acc.subsCount + 1
+                                , audiosSelected = acc.audiosSelected
+                                , audiosCount = acc.audiosCount
+                                }
+
+                            else if type_ == "audio" then
+                                { subsSelected = acc.subsSelected
+                                , subsCount = acc.subsCount
+                                , audiosSelected =
+                                    if selected then
+                                        id
+
+                                    else
+                                        acc.audiosSelected
+                                , audiosCount = acc.audiosCount + 1
+                                }
+
+                            else
+                                acc
+                        )
+                        { subsSelected = 0, subsCount = 0, audiosSelected = 0, audiosCount = 0 }
+                        status.trackList
+            in
             ( { model
                 | position = round (100 * toFloat status.position / toFloat status.duration)
                 , volume = round (100 * toFloat status.volume / toFloat status.volumeMax)
                 , status = status
+                , subsSelected = subsSelected
+                , subsCount = subsCount
+                , audiosSelected = audiosSelected
+                , audiosCount = audiosCount
               }
             , Cmd.none
             )
