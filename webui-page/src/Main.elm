@@ -34,8 +34,10 @@ type alias Model =
 type Msg
     = Sent (Result Http.Error D.Value)
     | TogglePause
-    | SeekBack
+    | SeekBackward
     | SeekForward
+    | ChapterPrev
+    | ChapterNext
     | PlaylistPrev
     | PlaylistNext
     | PositionMsg Slider.Msg
@@ -183,12 +185,20 @@ view model =
                         )
                     )
                 , row [ spacing 20, width fill ]
-                    [ button (Just SeekBack)
+                    [ button (Just SeekBackward)
                         model.style
                         (icon model.style Icon.backward)
                     , button (Just SeekForward)
                         model.style
                         (icon model.style Icon.forward)
+                    ]
+                , row [ spacing 20, width fill ]
+                    [ button (Just ChapterPrev)
+                        model.style
+                        (icon model.style Icon.stepBackward)
+                    , button (Just ChapterNext)
+                        model.style
+                        (icon model.style Icon.stepForward)
                     ]
                 , row [ spacing 20, width fill ]
                     [ button (Just PlaylistPrev)
@@ -290,11 +300,17 @@ update msg model =
         TogglePause ->
             ( model, send "toggle_pause" )
 
-        SeekBack ->
+        SeekBackward ->
             ( model, send "seek/-10" )
 
         SeekForward ->
             ( model, send "seek/10" )
+
+        ChapterPrev ->
+            ( model, send "add_chapter/-1" )
+
+        ChapterNext ->
+            ( model, send "add_chapter/1" )
 
         PlaylistPrev ->
             ( model, send "playlist_prev" )
