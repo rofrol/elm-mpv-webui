@@ -213,14 +213,7 @@ update msg model =
             ( model, Cmd.none )
 
         TogglePause ->
-            let
-                status =
-                    model.status
-
-                newStatus =
-                    { status | pause = not status.pause }
-            in
-            ( { model | status = newStatus }, send "toggle_pause" )
+            ( model, send "toggle_pause" )
 
         SeekBack ->
             ( model, send "seek/-10" )
