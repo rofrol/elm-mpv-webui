@@ -11,6 +11,7 @@ type alias Style =
     , buttonHeight : Length
     , backgroundColor : Color
     , color : Color
+    , smallTextSize : Int
     }
 
 

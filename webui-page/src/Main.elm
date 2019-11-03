@@ -103,24 +103,24 @@ view model =
                     [ text model.status.filename ]
                 , el
                     [ Font.color model.style.color
-                    , Font.size 30
+                    , Font.size model.style.smallTextSize
                     ]
                     (text ("Sub-delay: " ++ String.fromInt model.status.subDelay ++ " ms"))
                 , el
                     [ Font.color model.style.color
-                    , Font.size 30
+                    , Font.size model.style.smallTextSize
                     ]
                     (text ("Audio-delay: " ++ String.fromInt model.status.audioDelay ++ " ms"))
                 , row [ width fill ]
                     [ el
                         [ Font.color model.style.color
-                        , Font.size 30
+                        , Font.size model.style.smallTextSize
                         , width fill
                         ]
                         (text ("-" ++ formatTime model.status.remaining))
                     , el
                         [ Font.color model.style.color
-                        , Font.size 30
+                        , Font.size model.style.smallTextSize
                         , width fill
                         ]
                         (el
@@ -129,7 +129,7 @@ view model =
                         )
                     , el
                         [ Font.color model.style.color
-                        , Font.size 30
+                        , Font.size model.style.smallTextSize
                         , width fill
                         ]
                         (el
@@ -214,6 +214,7 @@ styleLight =
     , buttonHeight = px 160
     , backgroundColor = rgb255 255 255 255
     , color = rgb255 0 0 0
+    , smallTextSize = 36
     }
 
 
@@ -224,6 +225,7 @@ styleDark =
     , buttonHeight = px 160
     , backgroundColor = rgb255 0 0 0
     , color = rgb255 255 255 255
+    , smallTextSize = 36
     }
 
 
