@@ -83,6 +83,7 @@ initialModel =
         , pause = True
         , volume = 0
         , volumeMax = 0
+        , filename = ""
         }
     , position = 0
     , maybePositionElement = Nothing
@@ -101,7 +102,8 @@ view model =
         [ Element.layoutWith { options = [ focusStyle focusStyle_ ] }
             [ padding 40, Background.color model.style.backgroundColor ]
             (column [ width fill, spacing 20 ]
-                [ Slider.view positionId
+                [ paragraph [ Font.color model.style.color, Font.size 40 ] [ text model.status.filename ]
+                , Slider.view positionId
                     model.positionPointerDown
                     model.style
                     model.maybePositionElement
@@ -345,16 +347,18 @@ type alias Status =
     , pause : Bool
     , volume : Int
     , volumeMax : Int
+    , filename : String
     }
 
 
 statusDecoder =
-    D.map5 Status
+    D.map6 Status
         (D.field "duration" D.int)
         (D.field "position" D.int)
         (D.field "pause" D.bool)
         (D.field "volume" D.int)
         (D.field "volume-max" D.int)
+        (D.field "filename" D.string)
 
 
 subscriptions : Model -> Sub Msg
