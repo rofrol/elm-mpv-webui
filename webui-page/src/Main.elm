@@ -62,6 +62,7 @@ type Msg
     | GetVolumeElement (Result Browser.Dom.Error Browser.Dom.Element)
     | GotStatus (Result Http.Error Status)
     | TogglePlaylist
+    | PlaylistJump Int
     | ToggleDark
     | Tick Time.Posix
 
@@ -310,17 +311,24 @@ playlist model =
                     )
                 )
             ]
-        , column [] <|
+        , column [ width fill, spacing 20 ] <|
             List.map
-                (el [ Font.color model.style.color ]
-                    << text
-                    << Maybe.withDefault ""
-                    << List.head
-                    << List.reverse
-                    << String.split "/"
-                    << (\{ filename } -> filename)
+                (\( i, { filename } ) ->
+                    buttonText (Just (PlaylistJump i)) model.style <|
+                        paragraph
+                            [ Html.Attributes.style "overflow-wrap" "break-word" |> htmlAttribute
+                            , padding 20
+                            , Font.size 30
+                            ]
+                            [ text <|
+                                Maybe.withDefault "" <|
+                                    List.head <|
+                                        List.reverse <|
+                                            String.split "/" filename
+                            ]
                 )
-                model.status.playList
+            <|
+                List.indexedMap Tuple.pair model.status.playList
         ]
 
 
@@ -613,6 +621,9 @@ update msg model =
               }
             , Cmd.none
             )
+
+        PlaylistJump i ->
+            ( model, send ("playlist_jump/" ++ String.fromInt i) )
 
         ToggleDark ->
             let
