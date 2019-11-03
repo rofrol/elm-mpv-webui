@@ -7,6 +7,8 @@ import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
+import FontAwesome.Icon as Icon exposing (Icon)
+import FontAwesome.Solid as Icon
 import Html.Attributes
 import Html.Events
 import Http
@@ -56,7 +58,7 @@ initialModel : Model
 initialModel =
     { position = 0
     , maybePositionElement = Nothing
-    , status = { duration = 0, position = 0 }
+    , status = { duration = 0, position = 0, pause = True }
     }
 
 
@@ -67,14 +69,27 @@ view model =
             [ padding 20 ]
             (column [ width fill, spacing 20 ]
                 [ slider "position" ClickMsg model.maybePositionElement model.position
-                , button (Just TogglePause) "|> / ||"
+                , button (Just TogglePause)
+                    (Icon.viewIcon
+                        (if model.status.pause then
+                            Icon.play
+
+                         else
+                            Icon.pause
+                        )
+                        |> Element.html
+                    )
                 , row [ spacing 20, width fill ]
-                    [ button (Just SeekBack) "<<"
-                    , button (Just SeekForward) ">>"
+                    [ button (Just SeekBack)
+                        (Icon.viewIcon Icon.backward |> Element.html)
+                    , button (Just SeekForward)
+                        (Icon.viewIcon Icon.forward |> Element.html)
                     ]
                 , row [ spacing 20, width fill ]
-                    [ button (Just PlaylistPrev) "|<<"
-                    , button (Just PlaylistNext) ">>|"
+                    [ button (Just PlaylistPrev)
+                        (Icon.viewIcon Icon.fastBackward |> Element.html)
+                    , button (Just PlaylistNext)
+                        (Icon.viewIcon Icon.fastForward |> Element.html)
                     ]
                 ]
             )
@@ -98,7 +113,7 @@ style =
     }
 
 
-button onPress text_ =
+button onPress element =
     Input.button
         [ Border.color style.borderColor
         , Border.width style.borderWidth
@@ -109,7 +124,7 @@ button onPress text_ =
         , Font.size 60
         ]
         { onPress = onPress
-        , label = el [ centerX ] (text text_)
+        , label = el [ centerX, width (px 80), height (px 80) ] element
         }
 
 
@@ -173,7 +188,14 @@ update msg model =
             ( model, Cmd.none )
 
         TogglePause ->
-            ( model, send "toggle_pause" )
+            let
+                status =
+                    model.status
+
+                newStatus =
+                    { status | pause = not status.pause }
+            in
+            ( { model | status = newStatus }, send "toggle_pause" )
 
         SeekBack ->
             ( model, send "seek/-10" )
@@ -227,13 +249,15 @@ getStatus =
 type alias Status =
     { duration : Int
     , position : Int
+    , pause : Bool
     }
 
 
 statusDecoder =
-    D.map2 Status
+    D.map3 Status
         (D.field "duration" D.int)
         (D.field "position" D.int)
+        (D.field "pause" D.bool)
 
 
 subscriptions : Model -> Sub Msg
