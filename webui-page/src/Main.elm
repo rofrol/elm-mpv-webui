@@ -84,6 +84,7 @@ initialModel =
         , volume = 0
         , volumeMax = 0
         , filename = ""
+        , subDelay = 0
         }
     , position = 0
     , maybePositionElement = Nothing
@@ -108,6 +109,11 @@ view model =
                     , Html.Attributes.style "overflow-wrap" "break-word" |> htmlAttribute
                     ]
                     [ text model.status.filename ]
+                , el
+                    [ Font.color model.style.color
+                    , Font.size 30
+                    ]
+                    (text ("Sub-delay: " ++ String.fromInt model.status.subDelay ++ " ms"))
                 , Slider.view positionId
                     model.positionPointerDown
                     model.style
@@ -344,26 +350,6 @@ getStatus =
         { url = "http://192.168.0.10:8080/api/status"
         , expect = Http.expectJson GotStatus statusDecoder
         }
-
-
-type alias Status =
-    { duration : Int
-    , position : Int
-    , pause : Bool
-    , volume : Int
-    , volumeMax : Int
-    , filename : String
-    }
-
-
-statusDecoder =
-    D.map6 Status
-        (D.field "duration" D.int)
-        (D.field "position" D.int)
-        (D.field "pause" D.bool)
-        (D.field "volume" D.int)
-        (D.field "volume-max" D.int)
-        (D.field "filename" D.string)
 
 
 subscriptions : Model -> Sub Msg
