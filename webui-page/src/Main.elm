@@ -292,6 +292,7 @@ home model =
         ]
 
 
+playlist : Model -> Element Msg
 playlist model =
     column [ width fill, spacing 20 ]
         [ row [ spacing 20, width fill ]
@@ -309,6 +310,17 @@ playlist model =
                     )
                 )
             ]
+        , column [] <|
+            List.map
+                (el [ Font.color model.style.color ]
+                    << text
+                    << Maybe.withDefault ""
+                    << List.head
+                    << List.reverse
+                    << String.split "/"
+                    << (\{ filename } -> filename)
+                )
+                model.status.playList
         ]
 
 
@@ -414,7 +426,8 @@ formatTime seconds =
 
 
 update msg model =
-    case Debug.log "msg" msg of
+    -- case Debug.log "msg" msg of
+    case msg of
         Sent _ ->
             ( model, Cmd.none )
 

@@ -36,6 +36,7 @@ type alias Status =
     , subDelay : Int
     , audioDelay : Int
     , trackList : List Track
+    , playList : List Play
     , fullscreen : Bool
     }
 
@@ -52,6 +53,7 @@ statusDecoder =
         |> andMap (D.field "sub-delay" D.int)
         |> andMap (D.field "audio-delay" D.int)
         |> andMap (D.field "track-list" (D.list trackDecoder))
+        |> andMap (D.field "playlist" (D.list playDecoder))
         |> andMap (D.field "fullscreen" D.bool)
 
 
@@ -69,6 +71,16 @@ trackDecoder =
         |> andMap (D.field "selected" D.bool)
 
 
+type alias Play =
+    { filename : String
+    }
+
+
+playDecoder =
+    D.succeed Play
+        |> andMap (D.field "filename" D.string)
+
+
 initStatus =
     { duration = 0
     , position = 0
@@ -80,5 +92,6 @@ initStatus =
     , subDelay = 0
     , audioDelay = 0
     , trackList = []
+    , playList = []
     , fullscreen = False
     }
