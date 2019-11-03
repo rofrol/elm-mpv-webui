@@ -165,7 +165,7 @@ view model =
                         , Font.size model.style.smallTextSize
                         , width fill
                         ]
-                        (el [ width (px 40), height (px 40) ] (icon model.style Icon.volumeDown))
+                        (el [ width (px 50), height (px 50) ] (icon model.style Icon.volumeDown))
                     , el
                         [ Font.color model.style.color
                         , Font.size model.style.smallTextSize
@@ -180,7 +180,7 @@ view model =
                         , Font.size model.style.smallTextSize
                         , width fill
                         ]
-                        (el [ alignRight, width (px 40), height (px 40) ] (icon model.style Icon.volumeUp))
+                        (el [ alignRight, width (px 50), height (px 50) ] (icon model.style Icon.volumeUp))
                     ]
                 , Slider.view volumeId
                     model.volumePointerDown
