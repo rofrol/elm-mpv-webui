@@ -47,6 +47,7 @@ type Msg
     | SubNext
     | AudioNext
     | SubDelay Float
+    | AudioDelay Float
     | PositionMsg Slider.Msg
     | VolumeMsg Slider.Msg
     | GetPositionElement (Result Browser.Dom.Error Browser.Dom.Element)
@@ -235,6 +236,14 @@ view model =
                         model.style
                         (text "Sub delay +")
                     ]
+                , row [ spacing 20, width fill ]
+                    [ buttonText (Just (AudioDelay -0.05))
+                        model.style
+                        (text "Audio delay -")
+                    , buttonText (Just (AudioDelay 0.05))
+                        model.style
+                        (text "Audio delay +")
+                    ]
                 , button (Just ToggleDark)
                     model.style
                     (icon model.style Icon.adjust)
@@ -369,6 +378,9 @@ update msg model =
 
         SubDelay value ->
             ( model, send ("add_sub_delay/" ++ String.fromFloat value) )
+
+        AudioDelay value ->
+            ( model, send ("add_audio_delay/" ++ String.fromFloat value) )
 
         PositionMsg subMsg ->
             case subMsg of
