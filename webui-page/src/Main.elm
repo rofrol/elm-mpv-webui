@@ -115,17 +115,18 @@ view model =
 
 
 icon style i =
+    Icon.viewStyled [ colorToRgbaAttr style.color ] i |> Element.html
+
+
+colorToRgbaAttr color =
     let
         { red, green, blue, alpha } =
-            toRgb style.color
+            toRgb color
 
         rgb =
             [ red, green, blue ] |> List.map ((*) 255 >> String.fromFloat) |> List.intersperse ", " |> List.foldl (++) ""
     in
-    Icon.viewStyled
-        [ Html.Attributes.style "color" ("rgba(" ++ rgb ++ "," ++ String.fromFloat alpha ++ ")") ]
-        i
-        |> Element.html
+    Html.Attributes.style "color" ("rgba(" ++ rgb ++ "," ++ String.fromFloat alpha ++ ")")
 
 
 focusStyle_ : FocusStyle
