@@ -344,7 +344,7 @@ buttonText onPress style element =
         , padding 10
         , width fill
         , height style.buttonHeight
-        , Font.size 60
+        , Font.size 40
         ]
         { onPress = onPress
         , label = el [ width fill, Font.center, Font.color style.color, Font.bold ] element
