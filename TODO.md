@@ -11,3 +11,4 @@
 - [ ] save settings like selected theme in localStorage
 - [ ] add audio loop
 - [ ] disable position slider until click for some time
+- [ ] setMetadata, mediaSession and other not visible for me functionalities
