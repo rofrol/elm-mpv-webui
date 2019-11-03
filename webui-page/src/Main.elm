@@ -66,7 +66,7 @@ view model =
     { title = "Title"
     , body =
         [ Element.layoutWith { options = [ focusStyle focusStyle_ ] }
-            [ padding 20 ]
+            [ padding 40 ]
             (column [ width fill, spacing 20 ]
                 [ slider "position" ClickMsg model.maybePositionElement model.position
                 , button (Just TogglePause)
