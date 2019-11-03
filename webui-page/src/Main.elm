@@ -34,7 +34,6 @@ type Msg
     | SeekForward
     | PlaylistPrev
     | PlaylistNext
-    | ClickMsg Coords
     | MouseDownMsg Coords
     | MouseMoveMsg Coords
     | MouseUpMsg
@@ -79,7 +78,7 @@ view model =
         [ Element.layoutWith { options = [ focusStyle focusStyle_ ] }
             [ padding 40, Background.color model.style.backgroundColor ]
             (column [ width fill, spacing 20 ]
-                [ slider "position" model.mouseDown ClickMsg MouseDownMsg MouseMoveMsg MouseUpMsg model.style model.maybePositionElement model.position
+                [ slider "position" model.mouseDown MouseDownMsg MouseMoveMsg MouseUpMsg model.style model.maybePositionElement model.position
                 , button (Just TogglePause)
                     model.style
                     (icon model.style
@@ -183,8 +182,8 @@ button onPress style element =
         }
 
 
-slider : String -> Bool -> (Coords -> Msg) -> (Coords -> Msg) -> (Coords -> Msg) -> Msg -> Style -> Maybe Browser.Dom.Element -> Int -> Element Msg
-slider id mouseDown clickMsg mouseDownMsg mouseMoveMsg mouseUpMsg style maybePositionElement position =
+slider : String -> Bool -> (Coords -> Msg) -> (Coords -> Msg) -> Msg -> Style -> Maybe Browser.Dom.Element -> Int -> Element Msg
+slider id mouseDown mouseDownMsg mouseMoveMsg mouseUpMsg style maybePositionElement position =
     let
         value : Int
         value =
@@ -197,8 +196,7 @@ slider id mouseDown clickMsg mouseDownMsg mouseMoveMsg mouseUpMsg style maybePos
 
         mouseAttrs =
             List.concat
-                [ [ onClickCoords clickMsg ]
-                , if mouseDown then
+                [ if mouseDown then
                     [ onMouseMoveCoords mouseMoveMsg
                     , Events.onMouseUp mouseUpMsg
                     ]
@@ -230,11 +228,6 @@ slider id mouseDown clickMsg mouseDownMsg mouseMoveMsg mouseUpMsg style maybePos
                 )
             )
         )
-
-
-onClickCoords : (Coords -> msg) -> Attribute msg
-onClickCoords msg =
-    Html.Events.on "click" (D.map msg localCoords) |> Element.htmlAttribute
 
 
 onMouseDownCoords : (Coords -> msg) -> Attribute msg
@@ -287,7 +280,7 @@ update msg model =
         PlaylistNext ->
             ( model, send "playlist_next" )
 
-        ClickMsg coords ->
+        MouseDownMsg coords ->
             let
                 position =
                     case model.maybePositionElement of
@@ -297,10 +290,7 @@ update msg model =
                         Nothing ->
                             0
             in
-            ( { model | position = position }, send ("set_position/" ++ String.fromFloat ((toFloat position / 100) * toFloat model.status.duration)) )
-
-        MouseDownMsg coords ->
-            ( { model | mouseDown = True }, Cmd.none )
+            ( { model | mouseDown = True, position = position }, send ("set_position/" ++ String.fromFloat ((toFloat position / 100) * toFloat model.status.duration)) )
 
         MouseMoveMsg coords ->
             let
