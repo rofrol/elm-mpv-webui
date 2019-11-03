@@ -110,7 +110,7 @@ view model =
     { title = "Title"
     , body =
         [ layoutWith { options = [ focusStyle focusStyle_ ] }
-            [ padding 40, Background.color model.style.backgroundColor ]
+            [ paddingEach { top = 10, right = 40, bottom = 40, left = 40 }, Background.color model.style.backgroundColor ]
             (column [ width fill, spacing 20 ]
                 [ el [ width fill ] (el [ alignRight ] (buttonPlaylist model.style))
                 , paragraph
@@ -324,9 +324,7 @@ styleDark =
 buttonPlaylist style =
     Input.button
         [ Background.color style.backgroundColor
-        , padding 10
         , height style.buttonHeight
-        , Font.size 60
         ]
         { onPress = Just TogglePlaylist
         , label = el [ centerX, width (px 80), height (px 80) ] (icon style Icon.listUl)
