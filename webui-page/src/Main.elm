@@ -102,7 +102,12 @@ view model =
         [ Element.layoutWith { options = [ focusStyle focusStyle_ ] }
             [ padding 40, Background.color model.style.backgroundColor ]
             (column [ width fill, spacing 20 ]
-                [ paragraph [ Font.color model.style.color, Font.size 40 ] [ text model.status.filename ]
+                [ paragraph
+                    [ Font.color model.style.color
+                    , Font.size 40
+                    , Html.Attributes.style "overflow-wrap" "break-word" |> Element.htmlAttribute
+                    ]
+                    [ text model.status.filename ]
                 , Slider.view positionId
                     model.positionPointerDown
                     model.style
