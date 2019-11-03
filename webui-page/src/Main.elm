@@ -86,14 +86,22 @@ focusStyle_ =
     }
 
 
+style =
+    { borderWidth = 3
+    , borderRounded = 6
+    , borderColor = rgb255 0 0 0
+    , buttonHeight = px 160
+    }
+
+
 button onPress text_ =
     Input.button
-        [ Border.color (rgb255 0 0 0)
-        , Border.width 3
-        , Border.rounded 6
+        [ Border.color style.borderColor
+        , Border.width style.borderWidth
+        , Border.rounded style.borderRounded
         , padding 10
         , width fill
-        , height (px 160)
+        , height style.buttonHeight
         , Font.size 60
         ]
         { onPress = onPress
@@ -104,29 +112,35 @@ button onPress text_ =
 slider : String -> (Coords -> Msg) -> Maybe Browser.Dom.Element -> Int -> Element Msg
 slider id msg maybePositionElement position =
     let
+        value : Int
         value =
             case maybePositionElement of
                 Just element ->
-                    round (toFloat position / 100 * element.element.width)
+                    round <| toFloat position / 100 * element.element.width
 
                 Nothing ->
                     0
     in
-    el [ Html.Attributes.id id |> Element.htmlAttribute, width fill ]
-        (el
-            [ onClickCoords msg
-            , width fill
-            , height (px 160)
-            , Border.color (rgb255 0 0 0)
-            , Border.width 3
-            , Border.rounded 6
-            ]
+    el
+        [ width fill
+        , height style.buttonHeight
+        , Border.color style.borderColor
+        , Border.width style.borderWidth
+        , Border.rounded style.borderRounded
+        ]
+        (el [ width fill, height fill, Html.Attributes.id id |> Element.htmlAttribute ]
             (el
-                [ width (px value)
+                [ onClickCoords msg
+                , width fill
                 , height fill
-                , Background.color (rgb255 0 0 0)
                 ]
-                Element.none
+                (el
+                    [ width (px value)
+                    , height fill
+                    , Background.color style.borderColor
+                    ]
+                    Element.none
+                )
             )
         )
 
