@@ -9,3 +9,4 @@
 - [ ] use readyModel for getting element?
 - [ ] extract slider to separate module
 - [ ] save settings like selected theme in localStorage
+- [ ] add audio loop
