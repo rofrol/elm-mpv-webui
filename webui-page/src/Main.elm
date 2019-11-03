@@ -20,6 +20,8 @@ type alias Model =
     { position : Int
     , maybePositionElement : Maybe Browser.Dom.Element
     , status : Status
+    , dark : Bool
+    , style : Style
     }
 
 
@@ -33,6 +35,7 @@ type Msg
     | ClickMsg Coords
     | GetPositionElement (Result Browser.Dom.Error Browser.Dom.Element)
     | GotStatus (Result Http.Error Status)
+    | ToggleDark
 
 
 main : Program () Model Msg
@@ -59,6 +62,8 @@ initialModel =
     { position = 0
     , maybePositionElement = Nothing
     , status = { duration = 0, position = 0, pause = True }
+    , dark = True
+    , style = styleDark
     }
 
 
@@ -66,35 +71,58 @@ view model =
     { title = "Title"
     , body =
         [ Element.layoutWith { options = [ focusStyle focusStyle_ ] }
-            [ padding 40 ]
+            [ padding 40, Background.color model.style.backgroundColor ]
             (column [ width fill, spacing 20 ]
-                [ slider "position" ClickMsg model.maybePositionElement model.position
+                [ slider "position" ClickMsg model.style model.maybePositionElement model.position
                 , button (Just TogglePause)
-                    (Icon.viewIcon
+                    model.style
+                    (icon model.style
                         (if model.status.pause then
                             Icon.play
 
                          else
                             Icon.pause
                         )
-                        |> Element.html
                     )
                 , row [ spacing 20, width fill ]
                     [ button (Just SeekBack)
-                        (Icon.viewIcon Icon.backward |> Element.html)
+                        model.style
+                        (icon model.style Icon.backward)
                     , button (Just SeekForward)
-                        (Icon.viewIcon Icon.forward |> Element.html)
+                        model.style
+                        (icon model.style Icon.forward)
                     ]
                 , row [ spacing 20, width fill ]
                     [ button (Just PlaylistPrev)
-                        (Icon.viewIcon Icon.fastBackward |> Element.html)
+                        model.style
+                        (icon model.style Icon.fastBackward)
                     , button (Just PlaylistNext)
-                        (Icon.viewIcon Icon.fastForward |> Element.html)
+                        model.style
+                        (icon model.style Icon.fastForward)
                     ]
+                , button (Just ToggleDark)
+                    model.style
+                    (icon model.style Icon.adjust)
                 ]
             )
         ]
     }
+
+
+icon style i =
+    let
+        c =
+            toRgb style.color
+
+        rgb =
+            [ c.red, c.green, c.blue ] |> List.map ((*) 255 >> String.fromFloat) |> List.intersperse ", " |> List.foldl (++) ""
+    in
+    Icon.viewStyled
+        [ Html.Attributes.style "color"
+            ("rgb(" ++ rgb ++ ")")
+        ]
+        i
+        |> Element.html
 
 
 focusStyle_ : FocusStyle
@@ -105,19 +133,42 @@ focusStyle_ =
     }
 
 
-style =
+type alias Style =
+    { borderWidth : Int
+    , borderRounded : Int
+    , borderColor : Color
+    , buttonHeight : Length
+    , backgroundColor : Color
+    , color : Color
+    }
+
+
+styleLight =
     { borderWidth = 3
     , borderRounded = 6
     , borderColor = rgb255 0 0 0
     , buttonHeight = px 160
+    , backgroundColor = rgb255 255 255 255
+    , color = rgb255 0 0 0
     }
 
 
-button onPress element =
+styleDark =
+    { borderWidth = 3
+    , borderRounded = 6
+    , borderColor = rgb255 255 255 255
+    , buttonHeight = px 160
+    , backgroundColor = rgb255 0 0 0
+    , color = rgb255 255 255 255
+    }
+
+
+button onPress style element =
     Input.button
         [ Border.color style.borderColor
         , Border.width style.borderWidth
         , Border.rounded style.borderRounded
+        , Background.color style.backgroundColor
         , padding 10
         , width fill
         , height style.buttonHeight
@@ -128,8 +179,8 @@ button onPress element =
         }
 
 
-slider : String -> (Coords -> Msg) -> Maybe Browser.Dom.Element -> Int -> Element Msg
-slider id msg maybePositionElement position =
+slider : String -> (Coords -> Msg) -> Style -> Maybe Browser.Dom.Element -> Int -> Element Msg
+slider id msg style maybePositionElement position =
     let
         value : Int
         value =
@@ -229,6 +280,23 @@ update msg model =
 
         GotStatus (Err err) ->
             ( model, Cmd.none )
+
+        ToggleDark ->
+            let
+                dark =
+                    not model.dark
+            in
+            ( { model
+                | dark = dark
+                , style =
+                    if dark then
+                        styleDark
+
+                    else
+                        styleLight
+              }
+            , Cmd.none
+            )
 
 
 send command =
