@@ -143,6 +143,29 @@ view model =
                     model.maybePositionElement
                     model.position
                     |> map PositionMsg
+                , row [ width fill ]
+                    [ el
+                        [ Font.color model.style.color
+                        , Font.size model.style.smallTextSize
+                        , width fill
+                        ]
+                        (el [ width (px 40) ] (icon model.style Icon.volumeDown))
+                    , el
+                        [ Font.color model.style.color
+                        , Font.size model.style.smallTextSize
+                        , width fill
+                        ]
+                        (el
+                            [ centerX ]
+                            (text (String.fromInt model.status.volume ++ "%"))
+                        )
+                    , el
+                        [ Font.color model.style.color
+                        , Font.size model.style.smallTextSize
+                        , width fill
+                        ]
+                        (el [ alignRight, width (px 40) ] (icon model.style Icon.volumeUp))
+                    ]
                 , Slider.view volumeId
                     model.volumePointerDown
                     model.style
