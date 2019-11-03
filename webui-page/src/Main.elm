@@ -99,13 +99,13 @@ initialModel =
 view model =
     { title = "Title"
     , body =
-        [ Element.layoutWith { options = [ focusStyle focusStyle_ ] }
+        [ layoutWith { options = [ focusStyle focusStyle_ ] }
             [ padding 40, Background.color model.style.backgroundColor ]
             (column [ width fill, spacing 20 ]
                 [ paragraph
                     [ Font.color model.style.color
                     , Font.size 40
-                    , Html.Attributes.style "overflow-wrap" "break-word" |> Element.htmlAttribute
+                    , Html.Attributes.style "overflow-wrap" "break-word" |> htmlAttribute
                     ]
                     [ text model.status.filename ]
                 , Slider.view positionId
@@ -113,13 +113,13 @@ view model =
                     model.style
                     model.maybePositionElement
                     model.position
-                    |> Element.map PositionMsg
+                    |> map PositionMsg
                 , Slider.view volumeId
                     model.volumePointerDown
                     model.style
                     model.maybeVolumeElement
                     model.volume
-                    |> Element.map VolumeMsg
+                    |> map VolumeMsg
                 , button (Just TogglePause)
                     model.style
                     (icon model.style
@@ -156,7 +156,7 @@ view model =
 
 
 icon style i =
-    Icon.viewStyled [ colorToRgbaAttr style.color ] i |> Element.html
+    Icon.viewStyled [ colorToRgbaAttr style.color ] i |> html
 
 
 colorToRgbaAttr color =
