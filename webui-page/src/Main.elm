@@ -111,14 +111,14 @@ view model =
 
 icon style i =
     let
-        { red, green, blue } =
+        { red, green, blue, alpha } =
             toRgb style.color
 
         rgb =
             [ red, green, blue ] |> List.map ((*) 255 >> String.fromFloat) |> List.intersperse ", " |> List.foldl (++) ""
     in
     Icon.viewStyled
-        [ Html.Attributes.style "color" ("rgb(" ++ rgb ++ ")") ]
+        [ Html.Attributes.style "color" ("rgba(" ++ rgb ++ "," ++ String.fromFloat alpha ++ ")") ]
         i
         |> Element.html
 
