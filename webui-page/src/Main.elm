@@ -55,6 +55,7 @@ type Msg
     | GetPositionElement (Result Browser.Dom.Error Browser.Dom.Element)
     | GetVolumeElement (Result Browser.Dom.Error Browser.Dom.Element)
     | GotStatus (Result Http.Error Status)
+    | TogglePlaylist
     | ToggleDark
     | Tick Time.Posix
 
@@ -111,7 +112,8 @@ view model =
         [ layoutWith { options = [ focusStyle focusStyle_ ] }
             [ padding 40, Background.color model.style.backgroundColor ]
             (column [ width fill, spacing 20 ]
-                [ paragraph
+                [ el [ width fill ] (el [ alignRight ] (buttonPlaylist model.style))
+                , paragraph
                     [ Font.color model.style.color
                     , Font.size 40
                     , Html.Attributes.style "overflow-wrap" "break-word" |> htmlAttribute
@@ -317,6 +319,18 @@ styleDark =
     , color = rgb255 255 255 255
     , smallTextSize = 36
     }
+
+
+buttonPlaylist style =
+    Input.button
+        [ Background.color style.backgroundColor
+        , padding 10
+        , height style.buttonHeight
+        , Font.size 60
+        ]
+        { onPress = Just TogglePlaylist
+        , label = el [ centerX, width (px 80), height (px 80) ] (icon style Icon.listUl)
+        }
 
 
 button onPress style element =
@@ -529,6 +543,9 @@ update msg model =
             )
 
         GotStatus (Err err) ->
+            ( model, Cmd.none )
+
+        TogglePlaylist ->
             ( model, Cmd.none )
 
         ToggleDark ->
