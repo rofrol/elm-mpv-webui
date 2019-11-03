@@ -17,12 +17,15 @@ import Task
 
 
 type alias Model =
-    { position : Int
+    { status : Status
+    , position : Int
     , maybePositionElement : Maybe Browser.Dom.Element
-    , status : Status
+    , positionPointerDown : Bool
+    , volume : Int
+    , maybeVolumeElement : Maybe Browser.Dom.Element
+    , volumePointerDown : Bool
     , dark : Bool
     , style : Style
-    , pointerDown : Bool
     }
 
 
@@ -33,10 +36,14 @@ type Msg
     | SeekForward
     | PlaylistPrev
     | PlaylistNext
-    | PointerDownMsg Coords
-    | PointerMoveMsg Coords
-    | PointerUpMsg
+    | PositionPointerDownMsg Coords
+    | PositionPointerMoveMsg Coords
+    | PositionPointerUpMsg
+    | VolumePointerDownMsg Coords
+    | VolumePointerMoveMsg Coords
+    | VolumePointerUpMsg
     | GetPositionElement (Result Browser.Dom.Error Browser.Dom.Element)
+    | GetVolumeElement (Result Browser.Dom.Error Browser.Dom.Element)
     | GotStatus (Result Http.Error Status)
     | ToggleDark
 
@@ -55,6 +62,7 @@ init _ =
     ( initialModel
     , Cmd.batch
         [ Task.attempt GetPositionElement (Browser.Dom.getElement "position")
+        , Task.attempt GetVolumeElement (Browser.Dom.getElement "volume")
         , getStatus
         ]
     )
@@ -62,12 +70,21 @@ init _ =
 
 initialModel : Model
 initialModel =
-    { position = 0
+    { status =
+        { duration = 0
+        , position = 0
+        , pause = True
+        , volume = 0
+        , volumeMax = 0
+        }
+    , position = 0
     , maybePositionElement = Nothing
-    , status = { duration = 0, position = 0, pause = True }
+    , positionPointerDown = False
+    , volume = 0
+    , maybeVolumeElement = Nothing
+    , volumePointerDown = False
     , dark = True
     , style = styleDark
-    , pointerDown = False
     }
 
 
@@ -78,13 +95,21 @@ view model =
             [ padding 40, Background.color model.style.backgroundColor ]
             (column [ width fill, spacing 20 ]
                 [ slider "position"
-                    model.pointerDown
-                    PointerDownMsg
-                    PointerMoveMsg
-                    PointerUpMsg
+                    model.positionPointerDown
+                    PositionPointerDownMsg
+                    PositionPointerMoveMsg
+                    PositionPointerUpMsg
                     model.style
                     model.maybePositionElement
                     model.position
+                , slider "volume"
+                    model.volumePointerDown
+                    VolumePointerDownMsg
+                    VolumePointerMoveMsg
+                    VolumePointerUpMsg
+                    model.style
+                    model.maybeVolumeElement
+                    model.volume
                 , button (Just TogglePause)
                     model.style
                     (icon model.style
@@ -292,7 +317,7 @@ update msg model =
         PlaylistNext ->
             ( model, send "playlist_next" )
 
-        PointerDownMsg coords ->
+        PositionPointerDownMsg coords ->
             let
                 position =
                     case model.maybePositionElement of
@@ -302,9 +327,9 @@ update msg model =
                         Nothing ->
                             0
             in
-            ( { model | pointerDown = True, position = position }, send ("set_position/" ++ String.fromFloat ((toFloat position / 100) * toFloat model.status.duration)) )
+            ( { model | positionPointerDown = True, position = position }, send ("set_position/" ++ String.fromFloat ((toFloat position / 100) * toFloat model.status.duration)) )
 
-        PointerMoveMsg coords ->
+        PositionPointerMoveMsg coords ->
             let
                 position =
                     case model.maybePositionElement of
@@ -316,14 +341,50 @@ update msg model =
             in
             ( { model | position = position }, send ("set_position/" ++ String.fromFloat ((toFloat position / 100) * toFloat model.status.duration)) )
 
-        PointerUpMsg ->
-            ( { model | pointerDown = False }, Cmd.none )
+        PositionPointerUpMsg ->
+            ( { model | positionPointerDown = False }, Cmd.none )
+
+        VolumePointerDownMsg coords ->
+            let
+                volume =
+                    case model.maybeVolumeElement of
+                        Just element ->
+                            round <| 100 * toFloat coords.x / element.element.width
+
+                        Nothing ->
+                            0
+            in
+            ( { model | volumePointerDown = True, volume = volume }, send ("set_volume/" ++ String.fromFloat ((toFloat volume / 100) * toFloat model.status.volumeMax)) )
+
+        VolumePointerMoveMsg coords ->
+            let
+                volume =
+                    case model.maybeVolumeElement of
+                        Just element ->
+                            round <| 100 * toFloat coords.x / element.element.width
+
+                        Nothing ->
+                            0
+            in
+            ( { model | volume = volume }, send ("set_volume/" ++ String.fromFloat ((toFloat volume / 100) * toFloat model.status.volumeMax)) )
+
+        VolumePointerUpMsg ->
+            ( { model | volumePointerDown = False }, Cmd.none )
 
         GetPositionElement result ->
             ( { model | maybePositionElement = Result.toMaybe result }, Cmd.none )
 
+        GetVolumeElement result ->
+            ( { model | maybeVolumeElement = Result.toMaybe result }, Cmd.none )
+
         GotStatus (Ok status) ->
-            ( { model | position = round (100 * toFloat status.position / toFloat status.duration), status = status }, Cmd.none )
+            ( { model
+                | position = round (100 * toFloat status.position / toFloat status.duration)
+                , volume = round (100 * toFloat status.volume / toFloat status.volumeMax)
+                , status = status
+              }
+            , Cmd.none
+            )
 
         GotStatus (Err err) ->
             ( model, Cmd.none )
@@ -365,14 +426,18 @@ type alias Status =
     { duration : Int
     , position : Int
     , pause : Bool
+    , volume : Int
+    , volumeMax : Int
     }
 
 
 statusDecoder =
-    D.map3 Status
+    D.map5 Status
         (D.field "duration" D.int)
         (D.field "position" D.int)
         (D.field "pause" D.bool)
+        (D.field "volume" D.int)
+        (D.field "volume-max" D.int)
 
 
 subscriptions : Model -> Sub Msg
