@@ -10,10 +10,11 @@ import Element.Input as Input
 import FontAwesome.Icon as Icon
 import FontAwesome.Solid as Icon
 import Html.Attributes
-import Html.Events
 import Http
 import Json.Decode as D exposing (Decoder)
+import Slider
 import Task
+import Types exposing (..)
 
 
 type alias Model =
@@ -36,12 +37,8 @@ type Msg
     | SeekForward
     | PlaylistPrev
     | PlaylistNext
-    | PositionPointerDownMsg Coords
-    | PositionPointerMoveMsg Coords
-    | PositionPointerUpMsg
-    | VolumePointerDownMsg Coords
-    | VolumePointerMoveMsg Coords
-    | VolumePointerUpMsg
+    | PositionMsg Slider.Msg
+    | VolumeMsg Slider.Msg
     | GetPositionElement (Result Browser.Dom.Error Browser.Dom.Element)
     | GetVolumeElement (Result Browser.Dom.Error Browser.Dom.Element)
     | GotStatus (Result Http.Error Status)
@@ -102,22 +99,18 @@ view model =
         [ Element.layoutWith { options = [ focusStyle focusStyle_ ] }
             [ padding 40, Background.color model.style.backgroundColor ]
             (column [ width fill, spacing 20 ]
-                [ slider positionId
+                [ Slider.view positionId
                     model.positionPointerDown
-                    PositionPointerDownMsg
-                    PositionPointerMoveMsg
-                    PositionPointerUpMsg
                     model.style
                     model.maybePositionElement
                     model.position
-                , slider volumeId
+                    |> Element.map PositionMsg
+                , Slider.view volumeId
                     model.volumePointerDown
-                    VolumePointerDownMsg
-                    VolumePointerMoveMsg
-                    VolumePointerUpMsg
                     model.style
                     model.maybeVolumeElement
                     model.volume
+                    |> Element.map VolumeMsg
                 , button (Just TogglePause)
                     model.style
                     (icon model.style
@@ -176,16 +169,6 @@ focusStyle_ =
     }
 
 
-type alias Style =
-    { borderWidth : Int
-    , borderRounded : Int
-    , borderColor : Color
-    , buttonHeight : Length
-    , backgroundColor : Color
-    , color : Color
-    }
-
-
 styleLight =
     { borderWidth = 3
     , borderRounded = 6
@@ -222,82 +205,6 @@ button onPress style element =
         }
 
 
-slider : String -> Bool -> (Coords -> Msg) -> (Coords -> Msg) -> Msg -> Style -> Maybe Browser.Dom.Element -> Int -> Element Msg
-slider id pointerDown pointerDownMsg pointerMoveMsg touchEndMsg style maybePositionElement position =
-    let
-        value : Int
-        value =
-            case maybePositionElement of
-                Just element ->
-                    round <| toFloat position / 100 * element.element.width
-
-                Nothing ->
-                    0
-
-        pointerAttrs =
-            List.concat
-                [ if pointerDown then
-                    [ onPointerMoveCoords pointerMoveMsg
-                    , onPointerUpCoords touchEndMsg
-                    ]
-
-                  else
-                    [ onPointerDownCoords pointerDownMsg ]
-                ]
-    in
-    el
-        [ width fill
-        , height style.buttonHeight
-        , Border.color style.borderColor
-        , Border.width style.borderWidth
-        , Border.rounded style.borderRounded
-        ]
-        (el [ width fill, height fill, Html.Attributes.id id |> Element.htmlAttribute ]
-            (el
-                ([ width fill
-                 , height fill
-                 ]
-                    ++ pointerAttrs
-                )
-                (el
-                    [ width (px value)
-                    , height fill
-                    , Background.color style.borderColor
-                    ]
-                    Element.none
-                )
-            )
-        )
-
-
-onPointerDownCoords : (Coords -> msg) -> Attribute msg
-onPointerDownCoords msg =
-    Html.Events.on "pointerdown" (D.map msg localCoords) |> Element.htmlAttribute
-
-
-onPointerMoveCoords : (Coords -> msg) -> Attribute msg
-onPointerMoveCoords msg =
-    Html.Events.on "pointermove" (D.map msg localCoords) |> Element.htmlAttribute
-
-
-onPointerUpCoords : msg -> Attribute msg
-onPointerUpCoords msg =
-    Html.Events.on "pointerup" (D.succeed msg) |> Element.htmlAttribute
-
-
-type alias Coords =
-    { x : Int
-    , y : Int
-    }
-
-
-localCoords : Decoder Coords
-localCoords =
-    D.map2 Coords
-        (D.field "offsetX" D.int)
-        (D.field "offsetY" D.int)
-
-
 update msg model =
     case Debug.log "msg" msg of
         Sent _ ->
@@ -325,59 +232,63 @@ update msg model =
         PlaylistNext ->
             ( model, send "playlist_next" )
 
-        PositionPointerDownMsg coords ->
-            let
-                position =
-                    case model.maybePositionElement of
-                        Just element ->
-                            round <| 100 * toFloat coords.x / element.element.width
+        PositionMsg subMsg ->
+            case subMsg of
+                Slider.PointerDownMsg coords ->
+                    let
+                        position =
+                            case model.maybePositionElement of
+                                Just element ->
+                                    round <| 100 * toFloat coords.x / element.element.width
 
-                        Nothing ->
-                            0
-            in
-            ( { model | positionPointerDown = True, position = position }, send ("set_position/" ++ String.fromFloat ((toFloat position / 100) * toFloat model.status.duration)) )
+                                Nothing ->
+                                    0
+                    in
+                    ( { model | positionPointerDown = True, position = position }, send ("set_position/" ++ String.fromFloat ((toFloat position / 100) * toFloat model.status.duration)) )
 
-        PositionPointerMoveMsg coords ->
-            let
-                position =
-                    case model.maybePositionElement of
-                        Just element ->
-                            round <| 100 * toFloat coords.x / element.element.width
+                Slider.PointerMoveMsg coords ->
+                    let
+                        position =
+                            case model.maybePositionElement of
+                                Just element ->
+                                    round <| 100 * toFloat coords.x / element.element.width
 
-                        Nothing ->
-                            0
-            in
-            ( { model | position = position }, send ("set_position/" ++ String.fromFloat ((toFloat position / 100) * toFloat model.status.duration)) )
+                                Nothing ->
+                                    0
+                    in
+                    ( { model | position = position }, send ("set_position/" ++ String.fromFloat ((toFloat position / 100) * toFloat model.status.duration)) )
 
-        PositionPointerUpMsg ->
-            ( { model | positionPointerDown = False }, Cmd.none )
+                Slider.PointerUpMsg ->
+                    ( { model | positionPointerDown = False }, Cmd.none )
 
-        VolumePointerDownMsg coords ->
-            let
-                volume =
-                    case model.maybeVolumeElement of
-                        Just element ->
-                            round <| 100 * toFloat coords.x / element.element.width
+        VolumeMsg subMsg ->
+            case subMsg of
+                Slider.PointerDownMsg coords ->
+                    let
+                        volume =
+                            case model.maybeVolumeElement of
+                                Just element ->
+                                    round <| 100 * toFloat coords.x / element.element.width
 
-                        Nothing ->
-                            0
-            in
-            ( { model | volumePointerDown = True, volume = volume }, send ("set_volume/" ++ String.fromFloat ((toFloat volume / 100) * toFloat model.status.volumeMax)) )
+                                Nothing ->
+                                    0
+                    in
+                    ( { model | volumePointerDown = True, volume = volume }, send ("set_volume/" ++ String.fromFloat ((toFloat volume / 100) * toFloat model.status.volumeMax)) )
 
-        VolumePointerMoveMsg coords ->
-            let
-                volume =
-                    case model.maybeVolumeElement of
-                        Just element ->
-                            round <| 100 * toFloat coords.x / element.element.width
+                Slider.PointerMoveMsg coords ->
+                    let
+                        volume =
+                            case model.maybeVolumeElement of
+                                Just element ->
+                                    round <| 100 * toFloat coords.x / element.element.width
 
-                        Nothing ->
-                            0
-            in
-            ( { model | volume = volume }, send ("set_volume/" ++ String.fromFloat ((toFloat volume / 100) * toFloat model.status.volumeMax)) )
+                                Nothing ->
+                                    0
+                    in
+                    ( { model | volume = volume }, send ("set_volume/" ++ String.fromFloat ((toFloat volume / 100) * toFloat model.status.volumeMax)) )
 
-        VolumePointerUpMsg ->
-            ( { model | volumePointerDown = False }, Cmd.none )
+                Slider.PointerUpMsg ->
+                    ( { model | volumePointerDown = False }, Cmd.none )
 
         GetPositionElement result ->
             ( { model | maybePositionElement = Result.toMaybe result }, Cmd.none )
