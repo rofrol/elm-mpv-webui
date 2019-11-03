@@ -1,0 +1,10 @@
+- [ ] click/touch feedback on buttons: change color when clicked?
+- [ ] get status every second
+- [ ] add all remaining functionality
+- [ ] get data through websockets: proxy rust server?
+- [ ] colorful theme
+- [ ] use model.status instead of model.position and model.volume?
+- [ ] combine many slider events to the last one if there are many in short time
+- [ ] add second rewind for ufc
+- [ ] use readyModel for getting element?
+- [ ] extract slider to separate module
