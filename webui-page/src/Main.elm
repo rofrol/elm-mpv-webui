@@ -623,7 +623,12 @@ update msg model =
             )
 
         PlaylistJump i ->
-            ( model, send ("playlist_jump/" ++ String.fromInt i) )
+            ( model
+            , Cmd.batch
+                [ send ("playlist_jump/" ++ String.fromInt i)
+                , send "play"
+                ]
+            )
 
         ToggleDark ->
             let
