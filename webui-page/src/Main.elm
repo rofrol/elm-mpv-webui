@@ -496,7 +496,10 @@ update msg model =
         GotStatus (Ok newStatus) ->
             let
                 status =
-                    if model.volumePointerDown then
+                    if model.positionPointerDown then
+                        { newStatus | position = round ((toFloat model.position / 100) * toFloat newStatus.duration) }
+
+                    else if model.volumePointerDown then
                         { newStatus | volume = round ((toFloat model.volume / 100) * toFloat newStatus.volumeMax) }
 
                     else
