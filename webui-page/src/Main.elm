@@ -32,7 +32,13 @@ type alias Model =
     , subsCount : Int
     , audiosSelected : Int
     , audiosCount : Int
+    , page : Page
     }
+
+
+type Page
+    = Home
+    | Playlist
 
 
 type Msg
@@ -103,6 +109,7 @@ initialModel =
     , subsCount = 0
     , audiosSelected = 0
     , audiosCount = 0
+    , page = Home
     }
 
 
@@ -111,169 +118,198 @@ view model =
     , body =
         [ layoutWith { options = [ focusStyle focusStyle_ ] }
             [ paddingEach { top = 10, right = 40, bottom = 40, left = 40 }, Background.color model.style.backgroundColor ]
-            (column [ width fill, spacing 20 ]
-                [ el [ width fill ] (el [ alignRight ] (buttonPlaylist model.style))
-                , paragraph
-                    [ Font.color model.style.color
-                    , Font.size 40
-                    , Html.Attributes.style "overflow-wrap" "break-word" |> htmlAttribute
-                    ]
-                    [ text model.status.filename ]
-                , el
-                    [ Font.color model.style.color
-                    , Font.size model.style.smallTextSize
-                    ]
-                    (text ("Sub-delay: " ++ String.fromInt model.status.subDelay ++ " ms"))
-                , el
-                    [ Font.color model.style.color
-                    , Font.size model.style.smallTextSize
-                    ]
-                    (text ("Audio-delay: " ++ String.fromInt model.status.audioDelay ++ " ms"))
-                , row [ width fill ]
-                    [ el
-                        [ Font.color model.style.color
-                        , Font.size model.style.smallTextSize
-                        , width fill
-                        ]
-                        (text ("-" ++ formatTime model.status.remaining))
-                    , el
-                        [ Font.color model.style.color
-                        , Font.size model.style.smallTextSize
-                        , width fill
-                        ]
-                        (el
-                            [ centerX ]
-                            (text (formatTime model.status.position))
-                        )
-                    , el
-                        [ Font.color model.style.color
-                        , Font.size model.style.smallTextSize
-                        , width fill
-                        ]
-                        (el
-                            [ alignRight ]
-                            (text (formatTime model.status.duration))
-                        )
-                    ]
-                , Slider.view positionId
-                    model.positionPointerDown
-                    model.style
-                    model.maybePositionElement
-                    model.position
-                    |> map PositionMsg
-                , row [ width fill ]
-                    [ el
-                        [ Font.color model.style.color
-                        , Font.size model.style.smallTextSize
-                        , width fill
-                        ]
-                        (el [ width (px 50), height (px 50) ] (icon model.style Icon.volumeDown))
-                    , el
-                        [ Font.color model.style.color
-                        , Font.size model.style.smallTextSize
-                        , width fill
-                        ]
-                        (el
-                            [ centerX ]
-                            (text (String.fromInt model.status.volume ++ "%"))
-                        )
-                    , el
-                        [ Font.color model.style.color
-                        , Font.size model.style.smallTextSize
-                        , width fill
-                        ]
-                        (el [ alignRight, width (px 50), height (px 50) ] (icon model.style Icon.volumeUp))
-                    ]
-                , Slider.view volumeId
-                    model.volumePointerDown
-                    model.style
-                    model.maybeVolumeElement
-                    model.volume
-                    |> map VolumeMsg
-                , button (Just TogglePause)
-                    model.style
-                    (icon model.style
-                        (if model.status.pause then
-                            Icon.play
+            (case model.page of
+                Home ->
+                    home model
 
-                         else
-                            Icon.pause
-                        )
-                    )
-                , row [ spacing 20, width fill ]
-                    [ button (Just SeekBackward)
-                        model.style
-                        (icon model.style Icon.backward)
-                    , button (Just SeekForward)
-                        model.style
-                        (icon model.style Icon.forward)
-                    ]
-                , row [ spacing 20, width fill ]
-                    [ button (Just ChapterPrev)
-                        model.style
-                        (icon model.style Icon.stepBackward)
-                    , button (Just ChapterNext)
-                        model.style
-                        (icon model.style Icon.stepForward)
-                    ]
-                , row [ spacing 20, width fill ]
-                    [ button (Just PlaylistPrev)
-                        model.style
-                        (icon model.style Icon.fastBackward)
-                    , button (Just PlaylistNext)
-                        model.style
-                        (icon model.style Icon.fastForward)
-                    ]
-                , row [ spacing 20, width fill ]
-                    [ buttonText (Just SubNext)
-                        model.style
-                        (text ("Next sub " ++ String.fromInt model.subsSelected ++ "/" ++ String.fromInt model.subsCount))
-                    , buttonText (Just AudioNext)
-                        model.style
-                        (text ("Next audio " ++ String.fromInt model.audiosSelected ++ "/" ++ String.fromInt model.audiosCount))
-                    ]
-                , row [ spacing 20, width fill ]
-                    [ buttonText (Just (SubDelay -0.05))
-                        model.style
-                        (text "Sub delay -")
-                    , buttonText (Just (SubDelay 0.05))
-                        model.style
-                        (text "Sub delay +")
-                    ]
-                , row [ spacing 20, width fill ]
-                    [ buttonText (Just (AudioDelay -0.05))
-                        model.style
-                        (text "Audio delay -")
-                    , buttonText (Just (AudioDelay 0.05))
-                        model.style
-                        (text "Audio delay +")
-                    ]
-                , row [ spacing 20, width fill ]
-                    [ buttonText (Just Fullscreen)
-                        model.style
-                        (text
-                            ("Fullscreen "
-                                ++ (if model.status.fullscreen then
-                                        "off"
-
-                                    else
-                                        "on"
-                                   )
-                            )
-                        )
-
-                    -- disabled because breaks on Ubuntu
-                    , buttonText Nothing
-                        model.style
-                        (text "Audio device")
-                    ]
-                , button (Just ToggleDark)
-                    model.style
-                    (icon model.style Icon.adjust)
-                ]
+                Playlist ->
+                    playlist model
             )
         ]
     }
+
+
+home model =
+    column [ width fill, spacing 20 ]
+        [ el [ width fill ] (el [ alignRight ] (buttonPlaylist model.style))
+        , paragraph
+            [ Font.color model.style.color
+            , Font.size 40
+            , Html.Attributes.style "overflow-wrap" "break-word" |> htmlAttribute
+            ]
+            [ text model.status.filename ]
+        , el
+            [ Font.color model.style.color
+            , Font.size model.style.smallTextSize
+            ]
+            (text ("Sub-delay: " ++ String.fromInt model.status.subDelay ++ " ms"))
+        , el
+            [ Font.color model.style.color
+            , Font.size model.style.smallTextSize
+            ]
+            (text ("Audio-delay: " ++ String.fromInt model.status.audioDelay ++ " ms"))
+        , row [ width fill ]
+            [ el
+                [ Font.color model.style.color
+                , Font.size model.style.smallTextSize
+                , width fill
+                ]
+                (text ("-" ++ formatTime model.status.remaining))
+            , el
+                [ Font.color model.style.color
+                , Font.size model.style.smallTextSize
+                , width fill
+                ]
+                (el
+                    [ centerX ]
+                    (text (formatTime model.status.position))
+                )
+            , el
+                [ Font.color model.style.color
+                , Font.size model.style.smallTextSize
+                , width fill
+                ]
+                (el
+                    [ alignRight ]
+                    (text (formatTime model.status.duration))
+                )
+            ]
+        , Slider.view positionId
+            model.positionPointerDown
+            model.style
+            model.maybePositionElement
+            model.position
+            |> map PositionMsg
+        , row [ width fill ]
+            [ el
+                [ Font.color model.style.color
+                , Font.size model.style.smallTextSize
+                , width fill
+                ]
+                (el [ width (px 50), height (px 50) ] (icon model.style Icon.volumeDown))
+            , el
+                [ Font.color model.style.color
+                , Font.size model.style.smallTextSize
+                , width fill
+                ]
+                (el
+                    [ centerX ]
+                    (text (String.fromInt model.status.volume ++ "%"))
+                )
+            , el
+                [ Font.color model.style.color
+                , Font.size model.style.smallTextSize
+                , width fill
+                ]
+                (el [ alignRight, width (px 50), height (px 50) ] (icon model.style Icon.volumeUp))
+            ]
+        , Slider.view volumeId
+            model.volumePointerDown
+            model.style
+            model.maybeVolumeElement
+            model.volume
+            |> map VolumeMsg
+        , button (Just TogglePause)
+            model.style
+            (icon model.style
+                (if model.status.pause then
+                    Icon.play
+
+                 else
+                    Icon.pause
+                )
+            )
+        , row [ spacing 20, width fill ]
+            [ button (Just SeekBackward)
+                model.style
+                (icon model.style Icon.backward)
+            , button (Just SeekForward)
+                model.style
+                (icon model.style Icon.forward)
+            ]
+        , row [ spacing 20, width fill ]
+            [ button (Just ChapterPrev)
+                model.style
+                (icon model.style Icon.stepBackward)
+            , button (Just ChapterNext)
+                model.style
+                (icon model.style Icon.stepForward)
+            ]
+        , row [ spacing 20, width fill ]
+            [ button (Just PlaylistPrev)
+                model.style
+                (icon model.style Icon.fastBackward)
+            , button (Just PlaylistNext)
+                model.style
+                (icon model.style Icon.fastForward)
+            ]
+        , row [ spacing 20, width fill ]
+            [ buttonText (Just SubNext)
+                model.style
+                (text ("Next sub " ++ String.fromInt model.subsSelected ++ "/" ++ String.fromInt model.subsCount))
+            , buttonText (Just AudioNext)
+                model.style
+                (text ("Next audio " ++ String.fromInt model.audiosSelected ++ "/" ++ String.fromInt model.audiosCount))
+            ]
+        , row [ spacing 20, width fill ]
+            [ buttonText (Just (SubDelay -0.05))
+                model.style
+                (text "Sub delay -")
+            , buttonText (Just (SubDelay 0.05))
+                model.style
+                (text "Sub delay +")
+            ]
+        , row [ spacing 20, width fill ]
+            [ buttonText (Just (AudioDelay -0.05))
+                model.style
+                (text "Audio delay -")
+            , buttonText (Just (AudioDelay 0.05))
+                model.style
+                (text "Audio delay +")
+            ]
+        , row [ spacing 20, width fill ]
+            [ buttonText (Just Fullscreen)
+                model.style
+                (text
+                    ("Fullscreen "
+                        ++ (if model.status.fullscreen then
+                                "off"
+
+                            else
+                                "on"
+                           )
+                    )
+                )
+
+            -- disabled because breaks on Ubuntu
+            , buttonText Nothing
+                model.style
+                (text "Audio device")
+            ]
+        , button (Just ToggleDark)
+            model.style
+            (icon model.style Icon.adjust)
+        ]
+
+
+playlist model =
+    column [ width fill, spacing 20 ]
+        [ row [ spacing 20, width fill ]
+            [ buttonText (Just TogglePlaylist)
+                model.style
+                (text "Hide")
+            , button (Just TogglePause)
+                model.style
+                (icon model.style
+                    (if model.status.pause then
+                        Icon.play
+
+                     else
+                        Icon.pause
+                    )
+                )
+            ]
+        ]
 
 
 icon style i =
@@ -554,7 +590,16 @@ update msg model =
             ( model, Cmd.none )
 
         TogglePlaylist ->
-            ( model, Cmd.none )
+            ( { model
+                | page =
+                    if model.page == Playlist then
+                        Home
+
+                    else
+                        Playlist
+              }
+            , Cmd.none
+            )
 
         ToggleDark ->
             let
