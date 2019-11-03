@@ -23,6 +23,7 @@ type alias Coords =
 type alias Status =
     { duration : Int
     , position : Int
+    , remaining : Int
     , pause : Bool
     , volume : Int
     , volumeMax : Int
@@ -32,21 +33,27 @@ type alias Status =
     }
 
 
+andMap =
+    D.map2 (|>)
+
+
 statusDecoder =
-    D.map8 Status
-        (D.field "duration" D.int)
-        (D.field "position" D.int)
-        (D.field "pause" D.bool)
-        (D.field "volume" D.int)
-        (D.field "volume-max" D.int)
-        (D.field "filename" D.string)
-        (D.field "sub-delay" D.int)
-        (D.field "audio-delay" D.int)
+    D.succeed Status
+        |> andMap (D.field "duration" D.int)
+        |> andMap (D.field "position" D.int)
+        |> andMap (D.field "remaining" D.int)
+        |> andMap (D.field "pause" D.bool)
+        |> andMap (D.field "volume" D.int)
+        |> andMap (D.field "volume-max" D.int)
+        |> andMap (D.field "filename" D.string)
+        |> andMap (D.field "sub-delay" D.int)
+        |> andMap (D.field "audio-delay" D.int)
 
 
 initStatus =
     { duration = 0
     , position = 0
+    , remaining = 0
     , pause = True
     , volume = 0
     , volumeMax = 0

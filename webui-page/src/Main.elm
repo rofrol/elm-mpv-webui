@@ -111,6 +111,32 @@ view model =
                     , Font.size 30
                     ]
                     (text ("Audio-delay: " ++ String.fromInt model.status.audioDelay ++ " ms"))
+                , row [ width fill ]
+                    [ el
+                        [ Font.color model.style.color
+                        , Font.size 30
+                        , width fill
+                        ]
+                        (text ("-" ++ formatTime model.status.remaining))
+                    , el
+                        [ Font.color model.style.color
+                        , Font.size 30
+                        , width fill
+                        ]
+                        (el
+                            [ centerX ]
+                            (text (formatTime model.status.position))
+                        )
+                    , el
+                        [ Font.color model.style.color
+                        , Font.size 30
+                        , width fill
+                        ]
+                        (el
+                            [ alignRight ]
+                            (text (formatTime model.status.duration))
+                        )
+                    ]
                 , Slider.view positionId
                     model.positionPointerDown
                     model.style
@@ -215,6 +241,20 @@ button onPress style element =
         { onPress = onPress
         , label = el [ centerX, width (px 80), height (px 80) ] element
         }
+
+
+formatTime seconds =
+    let
+        hour =
+            seconds // 3600
+
+        minute =
+            (seconds - hour * 3600) // 60
+
+        second =
+            (seconds - hour * 3600) - minute * 60
+    in
+    String.pad 2 '0' (String.fromInt hour) ++ ":" ++ String.pad 2 '0' (String.fromInt minute) ++ ":" ++ String.pad 2 '0' (String.fromInt second)
 
 
 update msg model =
