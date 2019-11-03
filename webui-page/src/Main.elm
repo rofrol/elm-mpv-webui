@@ -61,11 +61,19 @@ main =
 init _ =
     ( initialModel
     , Cmd.batch
-        [ Task.attempt GetPositionElement (Browser.Dom.getElement "position")
-        , Task.attempt GetVolumeElement (Browser.Dom.getElement "volume")
+        [ Task.attempt GetPositionElement (Browser.Dom.getElement positionId)
+        , Task.attempt GetVolumeElement (Browser.Dom.getElement volumeId)
         , getStatus
         ]
     )
+
+
+positionId =
+    "position"
+
+
+volumeId =
+    "volume"
 
 
 initialModel : Model
@@ -94,7 +102,7 @@ view model =
         [ Element.layoutWith { options = [ focusStyle focusStyle_ ] }
             [ padding 40, Background.color model.style.backgroundColor ]
             (column [ width fill, spacing 20 ]
-                [ slider "position"
+                [ slider positionId
                     model.positionPointerDown
                     PositionPointerDownMsg
                     PositionPointerMoveMsg
@@ -102,7 +110,7 @@ view model =
                     model.style
                     model.maybePositionElement
                     model.position
-                , slider "volume"
+                , slider volumeId
                     model.volumePointerDown
                     VolumePointerDownMsg
                     VolumePointerMoveMsg
