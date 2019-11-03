@@ -48,6 +48,8 @@ type Msg
     | AudioNext
     | SubDelay Float
     | AudioDelay Float
+    | Fullscreen
+    | AudioDeviceNext
     | PositionMsg Slider.Msg
     | VolumeMsg Slider.Msg
     | GetPositionElement (Result Browser.Dom.Error Browser.Dom.Element)
@@ -244,6 +246,25 @@ view model =
                         model.style
                         (text "Audio delay +")
                     ]
+                , row [ spacing 20, width fill ]
+                    [ buttonText (Just Fullscreen)
+                        model.style
+                        (text
+                            ("Fullscreen "
+                                ++ (if model.status.fullscreen then
+                                        "off"
+
+                                    else
+                                        "on"
+                                   )
+                            )
+                        )
+
+                    -- disabled because breaks on Ubuntu
+                    , buttonText Nothing
+                        model.style
+                        (text "Audio device")
+                    ]
                 , button (Just ToggleDark)
                     model.style
                     (icon model.style Icon.adjust)
@@ -381,6 +402,12 @@ update msg model =
 
         AudioDelay value ->
             ( model, send ("add_audio_delay/" ++ String.fromFloat value) )
+
+        Fullscreen ->
+            ( model, send "fullscreen" )
+
+        AudioDeviceNext ->
+            ( model, send "cycle_audio_device" )
 
         PositionMsg subMsg ->
             case subMsg of

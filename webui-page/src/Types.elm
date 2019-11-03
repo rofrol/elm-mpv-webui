@@ -4,6 +4,10 @@ import Element exposing (Color, Length)
 import Json.Decode as D
 
 
+andMap =
+    D.map2 (|>)
+
+
 type alias Style =
     { borderWidth : Int
     , borderRounded : Int
@@ -32,11 +36,23 @@ type alias Status =
     , subDelay : Int
     , audioDelay : Int
     , trackList : List Track
+    , fullscreen : Bool
     }
 
 
-andMap =
-    D.map2 (|>)
+statusDecoder =
+    D.succeed Status
+        |> andMap (D.field "duration" D.int)
+        |> andMap (D.field "position" D.int)
+        |> andMap (D.field "remaining" D.int)
+        |> andMap (D.field "pause" D.bool)
+        |> andMap (D.field "volume" D.int)
+        |> andMap (D.field "volume-max" D.int)
+        |> andMap (D.field "filename" D.string)
+        |> andMap (D.field "sub-delay" D.int)
+        |> andMap (D.field "audio-delay" D.int)
+        |> andMap (D.field "track-list" (D.list trackDecoder))
+        |> andMap (D.field "fullscreen" D.bool)
 
 
 type alias Track =
@@ -53,20 +69,6 @@ trackDecoder =
         |> andMap (D.field "selected" D.bool)
 
 
-statusDecoder =
-    D.succeed Status
-        |> andMap (D.field "duration" D.int)
-        |> andMap (D.field "position" D.int)
-        |> andMap (D.field "remaining" D.int)
-        |> andMap (D.field "pause" D.bool)
-        |> andMap (D.field "volume" D.int)
-        |> andMap (D.field "volume-max" D.int)
-        |> andMap (D.field "filename" D.string)
-        |> andMap (D.field "sub-delay" D.int)
-        |> andMap (D.field "audio-delay" D.int)
-        |> andMap (D.field "track-list" (D.list trackDecoder))
-
-
 initStatus =
     { duration = 0
     , position = 0
@@ -78,4 +80,5 @@ initStatus =
     , subDelay = 0
     , audioDelay = 0
     , trackList = []
+    , fullscreen = False
     }
