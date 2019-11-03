@@ -46,6 +46,7 @@ type Msg
     | PlaylistNext
     | SubNext
     | AudioNext
+    | SubDelay Float
     | PositionMsg Slider.Msg
     | VolumeMsg Slider.Msg
     | GetPositionElement (Result Browser.Dom.Error Browser.Dom.Element)
@@ -226,6 +227,14 @@ view model =
                         model.style
                         (text ("Next audio " ++ String.fromInt model.audiosSelected ++ "/" ++ String.fromInt model.audiosCount))
                     ]
+                , row [ spacing 20, width fill ]
+                    [ buttonText (Just (SubDelay -0.05))
+                        model.style
+                        (text "Sub delay -")
+                    , buttonText (Just (SubDelay 0.05))
+                        model.style
+                        (text "Sub delay +")
+                    ]
                 , button (Just ToggleDark)
                     model.style
                     (icon model.style Icon.adjust)
@@ -357,6 +366,9 @@ update msg model =
 
         AudioNext ->
             ( model, send "cycle_audio" )
+
+        SubDelay value ->
+            ( model, send ("add_sub_delay/" ++ String.fromFloat value) )
 
         PositionMsg subMsg ->
             case subMsg of
