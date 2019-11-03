@@ -17,6 +17,7 @@ import Task
 type alias Model =
     { position : Int
     , maybePositionElement : Maybe Browser.Dom.Element
+    , status : Status
     }
 
 
@@ -55,6 +56,7 @@ initialModel : Model
 initialModel =
     { position = 0
     , maybePositionElement = Nothing
+    , status = { duration = 0, position = 0 }
     }
 
 
@@ -195,13 +197,13 @@ update msg model =
                         Nothing ->
                             0
             in
-            ( { model | position = position }, Cmd.none )
+            ( { model | position = position }, send ("set_position/" ++ String.fromFloat ((toFloat position / 100) * toFloat model.status.duration)) )
 
         GetPositionElement result ->
             ( { model | maybePositionElement = Result.toMaybe result }, Cmd.none )
 
         GotStatus (Ok status) ->
-            ( { model | position = round (100 * toFloat status.position / toFloat status.duration) }, Cmd.none )
+            ( { model | position = round (100 * toFloat status.position / toFloat status.duration), status = status }, Cmd.none )
 
         GotStatus (Err err) ->
             ( model, Cmd.none )
