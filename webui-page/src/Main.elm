@@ -5,6 +5,7 @@ import Browser.Dom
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
+import Element.Events as Events
 import Element.Font as Font
 import Element.Input as Input
 import FontAwesome.Icon as Icon exposing (Icon)
@@ -22,6 +23,7 @@ type alias Model =
     , status : Status
     , dark : Bool
     , style : Style
+    , mouseDown : Bool
     }
 
 
@@ -33,6 +35,9 @@ type Msg
     | PlaylistPrev
     | PlaylistNext
     | ClickMsg Coords
+    | MouseDownMsg Coords
+    | MouseMoveMsg Coords
+    | MouseUpMsg
     | GetPositionElement (Result Browser.Dom.Error Browser.Dom.Element)
     | GotStatus (Result Http.Error Status)
     | ToggleDark
@@ -64,6 +69,7 @@ initialModel =
     , status = { duration = 0, position = 0, pause = True }
     , dark = True
     , style = styleDark
+    , mouseDown = False
     }
 
 
@@ -73,7 +79,7 @@ view model =
         [ Element.layoutWith { options = [ focusStyle focusStyle_ ] }
             [ padding 40, Background.color model.style.backgroundColor ]
             (column [ width fill, spacing 20 ]
-                [ slider "position" ClickMsg model.style model.maybePositionElement model.position
+                [ slider "position" model.mouseDown ClickMsg MouseDownMsg MouseMoveMsg MouseUpMsg model.style model.maybePositionElement model.position
                 , button (Just TogglePause)
                     model.style
                     (icon model.style
@@ -177,8 +183,8 @@ button onPress style element =
         }
 
 
-slider : String -> (Coords -> Msg) -> Style -> Maybe Browser.Dom.Element -> Int -> Element Msg
-slider id msg style maybePositionElement position =
+slider : String -> Bool -> (Coords -> Msg) -> (Coords -> Msg) -> (Coords -> Msg) -> Msg -> Style -> Maybe Browser.Dom.Element -> Int -> Element Msg
+slider id mouseDown clickMsg mouseDownMsg mouseMoveMsg mouseUpMsg style maybePositionElement position =
     let
         value : Int
         value =
@@ -188,6 +194,18 @@ slider id msg style maybePositionElement position =
 
                 Nothing ->
                     0
+
+        mouseAttrs =
+            List.concat
+                [ [ onClickCoords clickMsg ]
+                , if mouseDown then
+                    [ onMouseMoveCoords mouseMoveMsg
+                    , Events.onMouseUp mouseUpMsg
+                    ]
+
+                  else
+                    [ onMouseDownCoords mouseDownMsg ]
+                ]
     in
     el
         [ width fill
@@ -198,10 +216,11 @@ slider id msg style maybePositionElement position =
         ]
         (el [ width fill, height fill, Html.Attributes.id id |> Element.htmlAttribute ]
             (el
-                [ onClickCoords msg
-                , width fill
-                , height fill
-                ]
+                ([ width fill
+                 , height fill
+                 ]
+                    ++ mouseAttrs
+                )
                 (el
                     [ width (px value)
                     , height fill
@@ -216,6 +235,16 @@ slider id msg style maybePositionElement position =
 onClickCoords : (Coords -> msg) -> Attribute msg
 onClickCoords msg =
     Html.Events.on "click" (D.map msg localCoords) |> Element.htmlAttribute
+
+
+onMouseDownCoords : (Coords -> msg) -> Attribute msg
+onMouseDownCoords msg =
+    Html.Events.on "mousedown" (D.map msg localCoords) |> Element.htmlAttribute
+
+
+onMouseMoveCoords : (Coords -> msg) -> Attribute msg
+onMouseMoveCoords msg =
+    Html.Events.on "mousemove" (D.map msg localCoords) |> Element.htmlAttribute
 
 
 type alias Coords =
@@ -269,6 +298,24 @@ update msg model =
                             0
             in
             ( { model | position = position }, send ("set_position/" ++ String.fromFloat ((toFloat position / 100) * toFloat model.status.duration)) )
+
+        MouseDownMsg coords ->
+            ( { model | mouseDown = True }, Cmd.none )
+
+        MouseMoveMsg coords ->
+            let
+                position =
+                    case model.maybePositionElement of
+                        Just element ->
+                            round <| 100 * toFloat coords.x / element.element.width
+
+                        Nothing ->
+                            0
+            in
+            ( { model | position = position }, send ("set_position/" ++ String.fromFloat ((toFloat position / 100) * toFloat model.status.duration)) )
+
+        MouseUpMsg ->
+            ( { model | mouseDown = False }, Cmd.none )
 
         GetPositionElement result ->
             ( { model | maybePositionElement = Result.toMaybe result }, Cmd.none )
