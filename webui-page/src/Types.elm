@@ -73,12 +73,17 @@ trackDecoder =
 
 type alias Play =
     { filename : String
+    , current : Bool
     }
 
 
 playDecoder =
     D.succeed Play
         |> andMap (D.field "filename" D.string)
+        |> andMap
+            (D.maybe (D.field "current" D.bool)
+                |> D.map (\maybeBool -> maybeBool |> Maybe.withDefault False)
+            )
 
 
 initStatus =

@@ -136,7 +136,7 @@ home model =
         , paragraph
             [ Font.color model.style.color
             , Font.size 40
-            , Html.Attributes.style "overflow-wrap" "break-word" |> htmlAttribute
+            , Html.Attributes.style "word-break" "break-all" |> htmlAttribute
             ]
             [ text model.status.filename ]
         , el
@@ -313,18 +313,37 @@ playlist model =
             ]
         , column [ width fill, spacing 20 ] <|
             List.map
-                (\( i, { filename } ) ->
+                (\( i, { filename, current } ) ->
                     buttonText (Just (PlaylistJump i)) model.style <|
-                        paragraph
-                            [ Html.Attributes.style "overflow-wrap" "break-word" |> htmlAttribute
-                            , padding 20
-                            , Font.size 30
+                        row
+                            [ paddingEach { top = 20, right = 100, bottom = 20, left = 20 }
+                            , width fill
                             ]
-                            [ text <|
-                                Maybe.withDefault "" <|
-                                    List.head <|
-                                        List.reverse <|
-                                            String.split "/" filename
+                            [ el [ width (px 80) ]
+                                (el [ width (px 40), height (px 40) ]
+                                    (if current then
+                                        icon model.style
+                                            (if model.status.pause then
+                                                Icon.pause
+
+                                             else
+                                                Icon.play
+                                            )
+
+                                     else
+                                        none
+                                    )
+                                )
+                            , paragraph
+                                [ Html.Attributes.style "word-break" "break-all" |> htmlAttribute
+                                , Font.size 30
+                                ]
+                                [ text <|
+                                    Maybe.withDefault "" <|
+                                        List.head <|
+                                            List.reverse <|
+                                                String.split "/" filename
+                                ]
                             ]
                 )
             <|

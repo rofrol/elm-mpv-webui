@@ -1,6 +1,7 @@
 - [ ] click/touch feedback on buttons: change color when clicked?
 - [x] get status every second
-- [ ] add all remaining functionality
+- [x] add most of the remaining functionality
+- [ ] setMetadata, mediaSession and other not yet used by me functionalities
 - [ ] get data through websockets: proxy rust server?
 - [ ] colorful theme
 - [ ] use model.status instead of model.position and model.volume?
@@ -11,4 +12,3 @@
 - [ ] save settings like selected theme in localStorage
 - [ ] add audio loop
 - [ ] disable position slider until click for some time
-- [ ] setMetadata, mediaSession and other not visible for me functionalities
