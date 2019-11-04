@@ -12,3 +12,4 @@
 - [ ] add audio loop
 - [ ] disable position slider until click for some time
 - [ ] ensure that slider is not wider than wrapper
+- [ ] something with sorting when using my script mpvfind?
