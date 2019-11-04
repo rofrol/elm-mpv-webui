@@ -4,7 +4,6 @@
 - [ ] setMetadata, mediaSession and other not yet used by me functionalities
 - [ ] get data through websockets: proxy rust server?
 - [ ] colorful theme
-- [ ] use model.status instead of model.position and model.volume?
 - [ ] combine many slider events to the last one if there are many in short time
 - [ ] add second rewind for ufc
 - [ ] use readyModel for getting element?
