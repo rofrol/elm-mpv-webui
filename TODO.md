@@ -3,7 +3,7 @@
 - [x] add most of the remaining functionality
 - [ ] setMetadata, mediaSession and other not yet used by me functionalities
 - [ ] get data through websockets: proxy rust server?
-- [ ] colorful theme
+- [x] colorful theme
 - [ ] combine many slider events to the last one if there are many in short time
 - [ ] add second rewind for ufc
 - [ ] use readyModel for getting element?

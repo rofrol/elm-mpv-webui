@@ -43,7 +43,7 @@ view id pointerDown theme maybePositionElement position =
         [ width fill
         , height theme.buttonHeight
         , Border.color theme.borderColor
-        , Border.width theme.borderWidth
+        , Border.width theme.sliderBorderWidth
         , Border.rounded theme.borderRounded
         ]
         (el [ width fill, height fill, Html.Attributes.id id |> Element.htmlAttribute ]

@@ -135,6 +135,10 @@ view model =
 
 
 home model =
+    let
+        theme =
+            model.theme
+    in
     column [ width fill, spacing 20 ]
         [ el [ width fill ] (el [ alignRight ] (buttonPlaylist model.theme))
         , paragraph
@@ -191,7 +195,7 @@ home model =
                 , Font.size model.theme.smallTextSize
                 , width fill
                 ]
-                (el [ width (px 50), height (px 50) ] (icon model.theme Icon.volumeDown))
+                (el [ width (px 50), height (px 50) ] (icon model.theme True Icon.volumeDown))
             , el
                 [ Font.color model.theme.color
                 , Font.size model.theme.smallTextSize
@@ -206,7 +210,7 @@ home model =
                 , Font.size model.theme.smallTextSize
                 , width fill
                 ]
-                (el [ alignRight, width (px 50), height (px 50) ] (icon model.theme Icon.volumeUp))
+                (el [ alignRight, width (px 50), height (px 50) ] (icon model.theme True Icon.volumeUp))
             ]
         , Slider.view volumeId
             model.volumePointerDown
@@ -214,9 +218,11 @@ home model =
             model.maybeVolumeElement
             model.volume
             |> map VolumeMsg
-        , button (Just TogglePause)
+        , button [ Background.color model.theme.playColor ]
+            (Just TogglePause)
             model.theme
             (icon model.theme
+                True
                 (if model.status.pause then
                     Icon.play
 
@@ -225,56 +231,69 @@ home model =
                 )
             )
         , row [ spacing 20, width fill ]
-            [ button (Just SeekBackward)
+            [ button []
+                (Just SeekBackward)
+                { theme | backgroundColor = theme.seekColor }
+                (icon model.theme True Icon.backward)
+            , button [ Background.color model.theme.seekColor ]
+                (Just SeekForward)
                 model.theme
-                (icon model.theme Icon.backward)
-            , button (Just SeekForward)
-                model.theme
-                (icon model.theme Icon.forward)
+                (icon model.theme True Icon.forward)
             ]
         , row [ spacing 20, width fill ]
-            [ button (Just ChapterPrev)
-                model.theme
-                (icon model.theme Icon.stepBackward)
-            , button (Just ChapterNext)
-                model.theme
-                (icon model.theme Icon.stepForward)
+            [ button []
+                (Just ChapterPrev)
+                { theme | backgroundColor = theme.seekColor }
+                (icon model.theme True Icon.stepBackward)
+            , button []
+                (Just ChapterNext)
+                { theme | backgroundColor = theme.seekColor }
+                (icon model.theme True Icon.stepForward)
             ]
         , row [ spacing 20, width fill ]
-            [ button (Just PlaylistPrev)
-                model.theme
-                (icon model.theme Icon.fastBackward)
-            , button (Just PlaylistNext)
-                model.theme
-                (icon model.theme Icon.fastForward)
+            [ button []
+                (Just PlaylistPrev)
+                { theme | backgroundColor = theme.seekColor }
+                (icon model.theme True Icon.fastBackward)
+            , button []
+                (Just PlaylistNext)
+                { theme | backgroundColor = theme.seekColor }
+                (icon model.theme True Icon.fastForward)
             ]
         , row [ spacing 20, width fill ]
-            [ buttonText (Just SubNext)
-                model.theme
+            [ buttonText []
+                (Just SubNext)
+                { theme | backgroundColor = theme.nextColor }
                 (text ("Next sub " ++ String.fromInt model.subsSelected ++ "/" ++ String.fromInt model.subsCount))
-            , buttonText (Just AudioNext)
-                model.theme
+            , buttonText []
+                (Just AudioNext)
+                { theme | backgroundColor = theme.nextColor }
                 (text ("Next audio " ++ String.fromInt model.audiosSelected ++ "/" ++ String.fromInt model.audiosCount))
             ]
         , row [ spacing 20, width fill ]
-            [ buttonText (Just (SubDelay -0.05))
-                model.theme
+            [ buttonText []
+                (Just (SubDelay -0.05))
+                { theme | backgroundColor = theme.delayColor }
                 (text "Sub delay -")
-            , buttonText (Just (SubDelay 0.05))
-                model.theme
+            , buttonText []
+                (Just (SubDelay 0.05))
+                { theme | backgroundColor = theme.delayColor }
                 (text "Sub delay +")
             ]
         , row [ spacing 20, width fill ]
-            [ buttonText (Just (AudioDelay -0.05))
-                model.theme
+            [ buttonText []
+                (Just (AudioDelay -0.05))
+                { theme | backgroundColor = theme.delayColor }
                 (text "Audio delay -")
-            , buttonText (Just (AudioDelay 0.05))
-                model.theme
+            , buttonText []
+                (Just (AudioDelay 0.05))
+                { theme | backgroundColor = theme.delayColor }
                 (text "Audio delay +")
             ]
         , row [ spacing 20, width fill ]
-            [ buttonText (Just Fullscreen)
-                model.theme
+            [ buttonText []
+                (Just Fullscreen)
+                { theme | backgroundColor = theme.lastColor }
                 (text
                     ("Fullscreen "
                         ++ (if model.status.fullscreen then
@@ -287,19 +306,23 @@ home model =
                 )
 
             -- disabled because breaks on Ubuntu
-            , buttonText Nothing
-                model.theme
+            , buttonText []
+                Nothing
+                { theme | backgroundColor = theme.lastColor }
                 (text "Audio device")
             ]
         , row [ width fill, spacing 20 ]
-            [ buttonText (Just (SelectTheme WhiteTheme))
-                model.theme
+            [ buttonText []
+                (Just (SelectTheme WhiteTheme))
+                { theme | backgroundColor = theme.lastColor }
                 (text "white")
-            , buttonText (Just (SelectTheme BlackTheme))
-                model.theme
+            , buttonText []
+                (Just (SelectTheme BlackTheme))
+                { theme | backgroundColor = theme.lastColor }
                 (text "black")
-            , buttonText (Just (SelectTheme ColorfulTheme))
-                model.theme
+            , buttonText []
+                (Just (SelectTheme ColorfulTheme))
+                { theme | backgroundColor = theme.lastColor }
                 (text "colorful")
             ]
         ]
@@ -307,14 +330,21 @@ home model =
 
 playlist : Model -> Element Msg
 playlist model =
+    let
+        theme =
+            model.theme
+    in
     column [ width fill, spacing 20 ]
         [ row [ spacing 20, width fill ]
-            [ buttonText (Just TogglePlaylist)
-                model.theme
+            [ buttonText []
+                (Just TogglePlaylist)
+                { theme | backgroundColor = theme.nextColor }
                 (text "Hide")
-            , button (Just TogglePause)
-                model.theme
+            , button []
+                (Just TogglePause)
+                { theme | backgroundColor = theme.playColor }
                 (icon model.theme
+                    True
                     (if model.status.pause then
                         Icon.play
 
@@ -326,7 +356,17 @@ playlist model =
         , column [ width fill, spacing 20 ] <|
             List.map
                 (\( i, { filename, current } ) ->
-                    buttonText (Just (PlaylistJump i)) model.theme <|
+                    buttonText []
+                        (Just (PlaylistJump i))
+                        { theme
+                            | backgroundColor =
+                                if current then
+                                    theme.nextColor
+
+                                else
+                                    theme.lastColor
+                        }
+                    <|
                         row
                             [ paddingEach { top = 20, right = 100, bottom = 20, left = 20 }
                             , width fill
@@ -335,6 +375,7 @@ playlist model =
                                 (el [ width (px 40), height (px 40) ]
                                     (if current then
                                         icon model.theme
+                                            True
                                             (if model.status.pause then
                                                 Icon.pause
 
@@ -363,8 +404,18 @@ playlist model =
         ]
 
 
-icon theme i =
-    Icon.viewStyled [ colorToRgbaAttr theme.color ] i |> html
+icon theme inverse i =
+    Icon.viewStyled
+        [ colorToRgbaAttr
+            (if inverse then
+                theme.buttonForegroundColor
+
+             else
+                theme.color
+            )
+        ]
+        i
+        |> html
 
 
 colorToRgbaAttr color =
@@ -388,23 +439,55 @@ focusStyle_ =
 
 themeWhite =
     { borderWidth = 3
+    , sliderBorderWidth = 3
     , borderRounded = 6
     , borderColor = rgb255 0 0 0
     , buttonHeight = px 160
     , backgroundColor = rgb255 255 255 255
     , color = rgb255 0 0 0
+    , buttonForegroundColor = rgb255 0 0 0
     , smallTextSize = 36
+    , playColor = rgb255 255 255 255
+    , seekColor = rgb255 255 255 255
+    , nextColor = rgb255 255 255 255
+    , delayColor = rgb255 255 255 255
+    , lastColor = rgb255 255 255 255
     }
 
 
 themeBlack =
     { borderWidth = 3
+    , sliderBorderWidth = 3
     , borderRounded = 6
     , borderColor = rgb255 255 255 255
     , buttonHeight = px 160
     , backgroundColor = rgb255 0 0 0
     , color = rgb255 255 255 255
+    , buttonForegroundColor = rgb255 255 255 255
     , smallTextSize = 36
+    , playColor = rgb255 0 0 0
+    , seekColor = rgb255 0 0 0
+    , nextColor = rgb255 0 0 0
+    , delayColor = rgb255 0 0 0
+    , lastColor = rgb255 0 0 0
+    }
+
+
+themeColorful =
+    { borderWidth = 0
+    , sliderBorderWidth = 3
+    , borderRounded = 6
+    , borderColor = rgb255 255 255 255
+    , buttonHeight = px 160
+    , backgroundColor = rgb255 0 0 0
+    , color = rgb255 255 255 255
+    , buttonForegroundColor = rgb255 0 0 0
+    , smallTextSize = 36
+    , playColor = rgb255 102 255 102
+    , seekColor = rgb255 102 102 255
+    , nextColor = rgb255 145 52 188
+    , delayColor = rgb255 215 181 48
+    , lastColor = rgb255 153 153 153
     }
 
 
@@ -414,39 +497,43 @@ buttonPlaylist theme =
         , height theme.buttonHeight
         ]
         { onPress = Just TogglePlaylist
-        , label = el [ centerX, width (px 80), height (px 80) ] (icon theme Icon.listUl)
+        , label = el [ centerX, width (px 80), height (px 80) ] (icon theme False Icon.listUl)
         }
 
 
-button onPress theme element =
+button attrs onPress theme element =
     Input.button
-        [ Border.color theme.borderColor
-        , Border.width theme.borderWidth
-        , Border.rounded theme.borderRounded
-        , Background.color theme.backgroundColor
-        , padding 10
-        , width fill
-        , height theme.buttonHeight
-        , Font.size 60
-        ]
+        ([ Border.color theme.borderColor
+         , Border.width theme.borderWidth
+         , Border.rounded theme.borderRounded
+         , Background.color theme.backgroundColor
+         , padding 10
+         , width fill
+         , height theme.buttonHeight
+         , Font.size 60
+         ]
+            ++ attrs
+        )
         { onPress = onPress
         , label = el [ centerX, width (px 80), height (px 80) ] element
         }
 
 
-buttonText onPress theme element =
+buttonText attrs onPress theme element =
     Input.button
-        [ Border.color theme.borderColor
-        , Border.width theme.borderWidth
-        , Border.rounded theme.borderRounded
-        , Background.color theme.backgroundColor
-        , padding 10
-        , width fill
-        , height theme.buttonHeight
-        , Font.size 40
-        ]
+        ([ Border.color theme.borderColor
+         , Border.width theme.borderWidth
+         , Border.rounded theme.borderRounded
+         , Background.color theme.backgroundColor
+         , padding 10
+         , width fill
+         , height theme.buttonHeight
+         , Font.size 40
+         ]
+            ++ attrs
+        )
         { onPress = onPress
-        , label = el [ width fill, Font.center, Font.color theme.color, Font.bold ] element
+        , label = el [ width fill, Font.center, Font.color theme.buttonForegroundColor, Font.bold ] element
         }
 
 
@@ -672,7 +759,7 @@ update msg model =
                             themeBlack
 
                         ColorfulTheme ->
-                            themeWhite
+                            themeColorful
               }
             , Cmd.none
             )

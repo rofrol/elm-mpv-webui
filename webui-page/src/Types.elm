@@ -10,12 +10,19 @@ andMap =
 
 type alias Theme =
     { borderWidth : Int
+    , sliderBorderWidth : Int
     , borderRounded : Int
     , borderColor : Color
     , buttonHeight : Length
     , backgroundColor : Color
     , color : Color
+    , buttonForegroundColor : Color
     , smallTextSize : Int
+    , playColor : Color
+    , seekColor : Color
+    , nextColor : Color
+    , delayColor : Color
+    , lastColor : Color
     }
 
 
