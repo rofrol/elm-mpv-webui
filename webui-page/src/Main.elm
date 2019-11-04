@@ -109,7 +109,7 @@ initialModel =
     , volume = 0
     , maybeVolumeElement = Nothing
     , volumePointerDown = False
-    , theme = themeWhite
+    , theme = themeColorful
     , subsSelected = 0
     , subsCount = 0
     , audiosSelected = 0
@@ -313,6 +313,10 @@ home model =
             ]
         , row [ width fill, spacing 20 ]
             [ buttonText []
+                (Just (SelectTheme ColorfulTheme))
+                { theme | backgroundColor = theme.lastColor }
+                (text "colorful")
+            , buttonText []
                 (Just (SelectTheme WhiteTheme))
                 { theme | backgroundColor = theme.lastColor }
                 (text "white")
@@ -320,10 +324,6 @@ home model =
                 (Just (SelectTheme BlackTheme))
                 { theme | backgroundColor = theme.lastColor }
                 (text "black")
-            , buttonText []
-                (Just (SelectTheme ColorfulTheme))
-                { theme | backgroundColor = theme.lastColor }
-                (text "colorful")
             ]
         ]
 
