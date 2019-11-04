@@ -195,7 +195,7 @@ home model =
                 , Font.size model.theme.smallTextSize
                 , width fill
                 ]
-                (el [ width (px 50), height (px 50) ] (icon model.theme True Icon.volumeDown))
+                (el [ width (px 50), height (px 50) ] (icon model.theme False Icon.volumeDown))
             , el
                 [ Font.color model.theme.color
                 , Font.size model.theme.smallTextSize
@@ -210,7 +210,7 @@ home model =
                 , Font.size model.theme.smallTextSize
                 , width fill
                 ]
-                (el [ alignRight, width (px 50), height (px 50) ] (icon model.theme True Icon.volumeUp))
+                (el [ alignRight, width (px 50), height (px 50) ] (icon model.theme False Icon.volumeUp))
             ]
         , Slider.view volumeId
             model.volumePointerDown
