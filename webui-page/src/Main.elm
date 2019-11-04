@@ -357,7 +357,14 @@ playlist model =
             List.map
                 (\( i, { filename, current } ) ->
                     buttonText []
-                        (Just (PlaylistJump i))
+                        (Just
+                            (if current then
+                                TogglePause
+
+                             else
+                                PlaylistJump i
+                            )
+                        )
                         { theme
                             | backgroundColor =
                                 if current then
