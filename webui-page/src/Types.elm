@@ -8,7 +8,7 @@ andMap =
     D.map2 (|>)
 
 
-type alias Style =
+type alias Theme =
     { borderWidth : Int
     , borderRounded : Int
     , borderColor : Color

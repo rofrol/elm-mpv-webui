@@ -26,8 +26,7 @@ type alias Model =
     , volume : Int
     , maybeVolumeElement : Maybe Browser.Dom.Element
     , volumePointerDown : Bool
-    , dark : Bool
-    , style : Style
+    , theme : Theme
     , subsSelected : Int
     , subsCount : Int
     , audiosSelected : Int
@@ -39,6 +38,12 @@ type alias Model =
 type Page
     = Home
     | Playlist
+
+
+type ThemeSelect
+    = WhiteTheme
+    | BlackTheme
+    | ColorfulTheme
 
 
 type Msg
@@ -63,7 +68,7 @@ type Msg
     | GotStatus (Result Http.Error Status)
     | TogglePlaylist
     | PlaylistJump Int
-    | ToggleDark
+    | SelectTheme ThemeSelect
     | Tick Time.Posix
 
 
@@ -104,8 +109,7 @@ initialModel =
     , volume = 0
     , maybeVolumeElement = Nothing
     , volumePointerDown = False
-    , dark = True
-    , style = styleDark
+    , theme = themeWhite
     , subsSelected = 0
     , subsCount = 0
     , audiosSelected = 0
@@ -118,7 +122,7 @@ view model =
     { title = "Title"
     , body =
         [ layoutWith { options = [ focusStyle focusStyle_ ] }
-            [ paddingEach { top = 10, right = 40, bottom = 40, left = 40 }, Background.color model.style.backgroundColor ]
+            [ paddingEach { top = 10, right = 40, bottom = 40, left = 40 }, Background.color model.theme.backgroundColor ]
             (case model.page of
                 Home ->
                     home model
@@ -132,33 +136,33 @@ view model =
 
 home model =
     column [ width fill, spacing 20 ]
-        [ el [ width fill ] (el [ alignRight ] (buttonPlaylist model.style))
+        [ el [ width fill ] (el [ alignRight ] (buttonPlaylist model.theme))
         , paragraph
-            [ Font.color model.style.color
+            [ Font.color model.theme.color
             , Font.size 40
             , Html.Attributes.style "word-break" "break-all" |> htmlAttribute
             ]
             [ text model.status.filename ]
         , el
-            [ Font.color model.style.color
-            , Font.size model.style.smallTextSize
+            [ Font.color model.theme.color
+            , Font.size model.theme.smallTextSize
             ]
             (text ("Sub-delay: " ++ String.fromInt model.status.subDelay ++ " ms"))
         , el
-            [ Font.color model.style.color
-            , Font.size model.style.smallTextSize
+            [ Font.color model.theme.color
+            , Font.size model.theme.smallTextSize
             ]
             (text ("Audio-delay: " ++ String.fromInt model.status.audioDelay ++ " ms"))
         , row [ width fill ]
             [ el
-                [ Font.color model.style.color
-                , Font.size model.style.smallTextSize
+                [ Font.color model.theme.color
+                , Font.size model.theme.smallTextSize
                 , width fill
                 ]
                 (text ("-" ++ formatTime model.status.remaining))
             , el
-                [ Font.color model.style.color
-                , Font.size model.style.smallTextSize
+                [ Font.color model.theme.color
+                , Font.size model.theme.smallTextSize
                 , width fill
                 ]
                 (el
@@ -166,8 +170,8 @@ home model =
                     (text (formatTime model.status.position))
                 )
             , el
-                [ Font.color model.style.color
-                , Font.size model.style.smallTextSize
+                [ Font.color model.theme.color
+                , Font.size model.theme.smallTextSize
                 , width fill
                 ]
                 (el
@@ -177,20 +181,20 @@ home model =
             ]
         , Slider.view positionId
             model.positionPointerDown
-            model.style
+            model.theme
             model.maybePositionElement
             model.position
             |> map PositionMsg
         , row [ width fill ]
             [ el
-                [ Font.color model.style.color
-                , Font.size model.style.smallTextSize
+                [ Font.color model.theme.color
+                , Font.size model.theme.smallTextSize
                 , width fill
                 ]
-                (el [ width (px 50), height (px 50) ] (icon model.style Icon.volumeDown))
+                (el [ width (px 50), height (px 50) ] (icon model.theme Icon.volumeDown))
             , el
-                [ Font.color model.style.color
-                , Font.size model.style.smallTextSize
+                [ Font.color model.theme.color
+                , Font.size model.theme.smallTextSize
                 , width fill
                 ]
                 (el
@@ -198,21 +202,21 @@ home model =
                     (text (String.fromInt model.status.volume ++ "%"))
                 )
             , el
-                [ Font.color model.style.color
-                , Font.size model.style.smallTextSize
+                [ Font.color model.theme.color
+                , Font.size model.theme.smallTextSize
                 , width fill
                 ]
-                (el [ alignRight, width (px 50), height (px 50) ] (icon model.style Icon.volumeUp))
+                (el [ alignRight, width (px 50), height (px 50) ] (icon model.theme Icon.volumeUp))
             ]
         , Slider.view volumeId
             model.volumePointerDown
-            model.style
+            model.theme
             model.maybeVolumeElement
             model.volume
             |> map VolumeMsg
         , button (Just TogglePause)
-            model.style
-            (icon model.style
+            model.theme
+            (icon model.theme
                 (if model.status.pause then
                     Icon.play
 
@@ -222,55 +226,55 @@ home model =
             )
         , row [ spacing 20, width fill ]
             [ button (Just SeekBackward)
-                model.style
-                (icon model.style Icon.backward)
+                model.theme
+                (icon model.theme Icon.backward)
             , button (Just SeekForward)
-                model.style
-                (icon model.style Icon.forward)
+                model.theme
+                (icon model.theme Icon.forward)
             ]
         , row [ spacing 20, width fill ]
             [ button (Just ChapterPrev)
-                model.style
-                (icon model.style Icon.stepBackward)
+                model.theme
+                (icon model.theme Icon.stepBackward)
             , button (Just ChapterNext)
-                model.style
-                (icon model.style Icon.stepForward)
+                model.theme
+                (icon model.theme Icon.stepForward)
             ]
         , row [ spacing 20, width fill ]
             [ button (Just PlaylistPrev)
-                model.style
-                (icon model.style Icon.fastBackward)
+                model.theme
+                (icon model.theme Icon.fastBackward)
             , button (Just PlaylistNext)
-                model.style
-                (icon model.style Icon.fastForward)
+                model.theme
+                (icon model.theme Icon.fastForward)
             ]
         , row [ spacing 20, width fill ]
             [ buttonText (Just SubNext)
-                model.style
+                model.theme
                 (text ("Next sub " ++ String.fromInt model.subsSelected ++ "/" ++ String.fromInt model.subsCount))
             , buttonText (Just AudioNext)
-                model.style
+                model.theme
                 (text ("Next audio " ++ String.fromInt model.audiosSelected ++ "/" ++ String.fromInt model.audiosCount))
             ]
         , row [ spacing 20, width fill ]
             [ buttonText (Just (SubDelay -0.05))
-                model.style
+                model.theme
                 (text "Sub delay -")
             , buttonText (Just (SubDelay 0.05))
-                model.style
+                model.theme
                 (text "Sub delay +")
             ]
         , row [ spacing 20, width fill ]
             [ buttonText (Just (AudioDelay -0.05))
-                model.style
+                model.theme
                 (text "Audio delay -")
             , buttonText (Just (AudioDelay 0.05))
-                model.style
+                model.theme
                 (text "Audio delay +")
             ]
         , row [ spacing 20, width fill ]
             [ buttonText (Just Fullscreen)
-                model.style
+                model.theme
                 (text
                     ("Fullscreen "
                         ++ (if model.status.fullscreen then
@@ -284,12 +288,20 @@ home model =
 
             -- disabled because breaks on Ubuntu
             , buttonText Nothing
-                model.style
+                model.theme
                 (text "Audio device")
             ]
-        , button (Just ToggleDark)
-            model.style
-            (icon model.style Icon.adjust)
+        , row [ width fill, spacing 20 ]
+            [ buttonText (Just (SelectTheme WhiteTheme))
+                model.theme
+                (text "white")
+            , buttonText (Just (SelectTheme BlackTheme))
+                model.theme
+                (text "black")
+            , buttonText (Just (SelectTheme ColorfulTheme))
+                model.theme
+                (text "colorful")
+            ]
         ]
 
 
@@ -298,11 +310,11 @@ playlist model =
     column [ width fill, spacing 20 ]
         [ row [ spacing 20, width fill ]
             [ buttonText (Just TogglePlaylist)
-                model.style
+                model.theme
                 (text "Hide")
             , button (Just TogglePause)
-                model.style
-                (icon model.style
+                model.theme
+                (icon model.theme
                     (if model.status.pause then
                         Icon.play
 
@@ -314,7 +326,7 @@ playlist model =
         , column [ width fill, spacing 20 ] <|
             List.map
                 (\( i, { filename, current } ) ->
-                    buttonText (Just (PlaylistJump i)) model.style <|
+                    buttonText (Just (PlaylistJump i)) model.theme <|
                         row
                             [ paddingEach { top = 20, right = 100, bottom = 20, left = 20 }
                             , width fill
@@ -322,7 +334,7 @@ playlist model =
                             [ el [ width (px 80) ]
                                 (el [ width (px 40), height (px 40) ]
                                     (if current then
-                                        icon model.style
+                                        icon model.theme
                                             (if model.status.pause then
                                                 Icon.pause
 
@@ -351,8 +363,8 @@ playlist model =
         ]
 
 
-icon style i =
-    Icon.viewStyled [ colorToRgbaAttr style.color ] i |> html
+icon theme i =
+    Icon.viewStyled [ colorToRgbaAttr theme.color ] i |> html
 
 
 colorToRgbaAttr color =
@@ -374,7 +386,7 @@ focusStyle_ =
     }
 
 
-styleLight =
+themeWhite =
     { borderWidth = 3
     , borderRounded = 6
     , borderColor = rgb255 0 0 0
@@ -385,7 +397,7 @@ styleLight =
     }
 
 
-styleDark =
+themeBlack =
     { borderWidth = 3
     , borderRounded = 6
     , borderColor = rgb255 255 255 255
@@ -396,25 +408,25 @@ styleDark =
     }
 
 
-buttonPlaylist style =
+buttonPlaylist theme =
     Input.button
-        [ Background.color style.backgroundColor
-        , height style.buttonHeight
+        [ Background.color theme.backgroundColor
+        , height theme.buttonHeight
         ]
         { onPress = Just TogglePlaylist
-        , label = el [ centerX, width (px 80), height (px 80) ] (icon style Icon.listUl)
+        , label = el [ centerX, width (px 80), height (px 80) ] (icon theme Icon.listUl)
         }
 
 
-button onPress style element =
+button onPress theme element =
     Input.button
-        [ Border.color style.borderColor
-        , Border.width style.borderWidth
-        , Border.rounded style.borderRounded
-        , Background.color style.backgroundColor
+        [ Border.color theme.borderColor
+        , Border.width theme.borderWidth
+        , Border.rounded theme.borderRounded
+        , Background.color theme.backgroundColor
         , padding 10
         , width fill
-        , height style.buttonHeight
+        , height theme.buttonHeight
         , Font.size 60
         ]
         { onPress = onPress
@@ -422,19 +434,19 @@ button onPress style element =
         }
 
 
-buttonText onPress style element =
+buttonText onPress theme element =
     Input.button
-        [ Border.color style.borderColor
-        , Border.width style.borderWidth
-        , Border.rounded style.borderRounded
-        , Background.color style.backgroundColor
+        [ Border.color theme.borderColor
+        , Border.width theme.borderWidth
+        , Border.rounded theme.borderRounded
+        , Background.color theme.backgroundColor
         , padding 10
         , width fill
-        , height style.buttonHeight
+        , height theme.buttonHeight
         , Font.size 40
         ]
         { onPress = onPress
-        , label = el [ width fill, Font.center, Font.color style.color, Font.bold ] element
+        , label = el [ width fill, Font.center, Font.color theme.color, Font.bold ] element
         }
 
 
@@ -649,19 +661,18 @@ update msg model =
                 ]
             )
 
-        ToggleDark ->
-            let
-                dark =
-                    not model.dark
-            in
+        SelectTheme theme ->
             ( { model
-                | dark = dark
-                , style =
-                    if dark then
-                        styleDark
+                | theme =
+                    case theme of
+                        WhiteTheme ->
+                            themeWhite
 
-                    else
-                        styleLight
+                        BlackTheme ->
+                            themeBlack
+
+                        ColorfulTheme ->
+                            themeWhite
               }
             , Cmd.none
             )

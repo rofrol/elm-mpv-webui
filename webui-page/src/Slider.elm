@@ -16,8 +16,8 @@ type Msg
     | PointerUpMsg
 
 
-view : String -> Bool -> Style -> Maybe Browser.Dom.Element -> Int -> Element Msg
-view id pointerDown style maybePositionElement position =
+view : String -> Bool -> Theme -> Maybe Browser.Dom.Element -> Int -> Element Msg
+view id pointerDown theme maybePositionElement position =
     let
         value : Int
         value =
@@ -41,10 +41,10 @@ view id pointerDown style maybePositionElement position =
     in
     el
         [ width fill
-        , height style.buttonHeight
-        , Border.color style.borderColor
-        , Border.width style.borderWidth
-        , Border.rounded style.borderRounded
+        , height theme.buttonHeight
+        , Border.color theme.borderColor
+        , Border.width theme.borderWidth
+        , Border.rounded theme.borderRounded
         ]
         (el [ width fill, height fill, Html.Attributes.id id |> Element.htmlAttribute ]
             (el
@@ -56,7 +56,7 @@ view id pointerDown style maybePositionElement position =
                 (el
                     [ width (px value)
                     , height fill
-                    , Background.color style.borderColor
+                    , Background.color theme.borderColor
                     ]
                     Element.none
                 )
