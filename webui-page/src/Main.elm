@@ -163,7 +163,7 @@ home model =
                 , Font.size model.theme.smallTextSize
                 , width fill
                 ]
-                (text ("-" ++ formatTime model.status.remaining))
+                (text ("-" ++ seconds2HHMMSS model.status.remaining))
             , el
                 [ Font.color model.theme.color
                 , Font.size model.theme.smallTextSize
@@ -171,7 +171,7 @@ home model =
                 ]
                 (el
                     [ centerX ]
-                    (text (formatTime model.status.position))
+                    (text (seconds2HHMMSS model.status.position))
                 )
             , el
                 [ Font.color model.theme.color
@@ -180,7 +180,7 @@ home model =
                 ]
                 (el
                     [ alignRight ]
-                    (text (formatTime model.status.duration))
+                    (text (seconds2HHMMSS model.status.duration))
                 )
             ]
         , Slider.view positionId
@@ -544,18 +544,20 @@ buttonText attrs onPress theme element =
         }
 
 
-formatTime seconds =
+
+-- https://stackoverflow.com/questions/25696992/converting-seconds-to-hours-and-minutes-and-seconds/25697134#25697134
+
+
+seconds2HHMMSS : Int -> String
+seconds2HHMMSS seconds =
     let
-        hour =
-            seconds // 3600
+        minutes =
+            seconds // 60
 
-        minute =
-            (seconds - hour * 3600) // 60
-
-        second =
-            (seconds - hour * 3600) - minute * 60
+        hours =
+            minutes // 60
     in
-    String.join ":" <| List.map (String.pad 2 '0' << String.fromInt) [ hour, minute, second ]
+    String.join ":" <| List.map (String.pad 2 '0' << String.fromInt) [ hours, remainderBy 60 minutes, remainderBy 60 seconds ]
 
 
 update msg model =
