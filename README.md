@@ -1,6 +1,8 @@
 # elm-mpv-webui
 ...is a web based user interface with controls for the [mpv mediaplayer](https://mpv.io/).
 
+Written in elm, elm-ui and lua.
+
 ## Usage
 
 ### Elm
@@ -17,8 +19,8 @@ Tested on Ubuntu 19.10.
 $ mkdir -p ~/.config/mpv/scripts
 $ cd ~/.config/mpv/scripts
 $ git clone https://github.com/rofrol/elm-mpv-webui
-$ ln -s simple-mpv-webui/webui.lua .
-$ ln -s simple-mpv-webui/webui-page/ .
+$ ln -s elm-mpv-webui/webui.lua .
+$ ln -s elm-mpv-webui/webui-page/ .
 $ sudo apt install lua5.2 lua5.2-dev luarocks
 $ sudo luarocks install luasocket
 ```
@@ -118,14 +120,6 @@ Only plaintext `.htpasswd` entries are supported.
 ![webui screenshot](screenshots/webui.png#2)
 
 ![playlist screenshot](screenshots/playlist.png#1)
-
-## Media Session API
-When using a browser that supports it, simple-mpv-webui uses the Media Session
-API to provide a notification with some metadata and controls:
-
-![notification screenshot](screenshots/notification.png#1)
-
-In order to have the notification work properly you need to at least once trigger play from the webui.
 
 ## Endpoints
 You can also directly talk to the endpoints:
