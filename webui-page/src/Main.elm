@@ -555,7 +555,7 @@ formatTime seconds =
         second =
             (seconds - hour * 3600) - minute * 60
     in
-    String.pad 2 '0' (String.fromInt hour) ++ ":" ++ String.pad 2 '0' (String.fromInt minute) ++ ":" ++ String.pad 2 '0' (String.fromInt second)
+    String.join ":" <| List.map (String.pad 2 '0' << String.fromInt) [ hour, minute, second ]
 
 
 update msg model =
