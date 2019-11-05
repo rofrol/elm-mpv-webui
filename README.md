@@ -35,13 +35,11 @@ $ ln -s elm-mpv-webui/webui-page/ .
 Alternatively you can also use the `--script` option from mpv or add something like
 `scripts-add=/path/to/elm-mpv-webui/webui.lua` to `mpv.conf`.
 
-To find all videos files in directory and start playing them:
+### find all video files in directory and play them with mpv
 
-`find "$1" -type f -exec file -N -i -- {} + | sed -n 's!: video/[^:]*$!!p' | grep -v ".*\.sub$" | mpv --playlist=-`
+Use `mpvdir` script from this repo:
 
-or
-
-`find "$1" -type f -not -iname '*.srt' -not -iname '*.txt' -not -iname '*.cbr' -not -iname '*.nfo' -not -iname '*.sub' -not -iname '*.png' -not -iname '*.jpg' -not -iname '*.jpeg' -not -iname '*.gif' -not -iname '*.crt' -not -iname '*.idx' -exec file -N -i -- {} + | sed -n 's!: video/[^:]*$!!p' | mpv --playlist=-`
+`mpvdir /path/to/sth <mpv options>`
 
 ### Web browser
 

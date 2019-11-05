@@ -1,0 +1,6 @@
+#!/bin/bash
+
+dir="$1"
+shift
+
+find "$dir" -type f -not -iname '*.srt' -not -iname '*.txt' -not -iname '*.cbr' -not -iname '*.nfo' -not -iname '*.sub' -not -iname '*.png' -not -iname '*.jpg' -not -iname '*.jpeg' -not -iname '*.gif' -not -iname '*.crt' -not -iname '*.idx' -exec file -N -i -- {} + | sed -n 's!: video/[^:]*$!!p' | mpv --playlist=- "$@"
