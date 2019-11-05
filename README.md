@@ -16,13 +16,18 @@ Install elm https://guide.elm-lang.org/install/elm.html then run:
 Tested on Ubuntu 19.10.
 
 ```bash
-$ mkdir -p ~/.config/mpv/scripts
-$ cd ~/.config/mpv/scripts
-$ git clone https://github.com/rofrol/elm-mpv-webui
-$ ln -s elm-mpv-webui/webui.lua .
-$ ln -s elm-mpv-webui/webui-page/ .
 $ sudo apt install lua5.2 lua5.2-dev luarocks
 $ sudo luarocks install luasocket
+```
+
+### Install in mpv
+
+```bash
+$ git clone https://github.com/rofrol/elm-mpv-webui
+$ mkdir -p ~/.config/mpv/scripts
+$ cd ~/.config/mpv/scripts
+$ ln -s elm-mpv-webui/webui.lua .
+$ ln -s elm-mpv-webui/webui-page/ .
 ```
 
 Alternatively you can also use the `--script` option from mpv or add something like
