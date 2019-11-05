@@ -37,7 +37,11 @@ Alternatively you can also use the `--script` option from mpv or add something l
 
 To find all videos files in directory and start playing them:
 
-`find "$1" -type f -exec file -N -i -- {} + | sed -n 's!: video/[^:]*$!!p' | rg -v ".*\.sub$" | awk '{printf "\"%s\"\n", $0}' | xargs mpv`
+`find "$1" -type f -exec file -N -i -- {} + | sed -n 's!: video/[^:]*$!!p' | grep -v ".*\.sub$" | mpv --playlist=-`
+
+or
+
+`find "$1" -type f -not -iname '*.srt' -not -iname '*.txt' -not -iname '*.cbr' -not -iname '*.nfo' -not -iname '*.sub' -not -iname '*.png' -not -iname '*.jpg' -not -iname '*.jpeg' -not -iname '*.gif' -not -iname '*.crt' -not -iname '*.idx' -exec file -N -i -- {} + | sed -n 's!: video/[^:]*$!!p' | mpv --playlist=-`
 
 ### Web browser
 
