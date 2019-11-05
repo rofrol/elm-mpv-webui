@@ -9,7 +9,10 @@ Written in elm, elm-ui and lua.
 
 Install elm https://guide.elm-lang.org/install/elm.html then run:
 
-`elm make webui-page/src/Main.elm --output webui-page/webui.js`
+```bash
+$ git clone https://github.com/rofrol/elm-mpv-webui
+$ elm make webui-page/src/Main.elm --output webui-page/webui.js
+```
 
 ### Lua
 
@@ -23,7 +26,6 @@ $ sudo luarocks install luasocket
 ### Install in mpv
 
 ```bash
-$ git clone https://github.com/rofrol/elm-mpv-webui
 $ mkdir -p ~/.config/mpv/scripts
 $ cd ~/.config/mpv/scripts
 $ ln -s elm-mpv-webui/webui.lua .
