@@ -35,6 +35,10 @@ $ ln -s elm-mpv-webui/webui-page/ .
 Alternatively you can also use the `--script` option from mpv or add something like
 `scripts-add=/path/to/elm-mpv-webui/webui.lua` to `mpv.conf`.
 
+To find all videos files in directory and start playing them:
+
+`find "$1" -type f -exec file -N -i -- {} + | sed -n 's!: video/[^:]*$!!p' | rg -v ".*\.sub$" | awk '{printf "\"%s\"\n", $0}' | xargs mpv`
+
 ### Web browser
 
 You can access the webui when accessing [http://127.0.0.1:8080](http://127.0.0.1:8080) or
