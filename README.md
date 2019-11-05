@@ -118,9 +118,6 @@ user2:password2
 ```
 Only plaintext `.htpasswd` entries are supported.
 
-## Dependencies
- - [luasocket](https://github.com/diegonehab/luasocket)
-
 ## Screenshots
 ![webui screenshot](screenshots/webui.png#2)
 
