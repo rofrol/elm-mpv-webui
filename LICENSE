@@ -1,8 +1,8 @@
 The MIT License (MIT)
 
 Copyright for portions of project simple-mpv-webui are held by
-Markus Salmijärvi, 2015 as part of project mpv-web-ui. All other copyright for
-project simple-mpv-webui are held by Fabio Rämi, 2018-2019.
+Markus Salmijärvi, 2015 as part of project mpv-web-ui. Lua code copyright for
+project simple-mpv-webui is held by Fabio Rämi, 2018-2019. Elm code copyright is held by Roman Frołow 2019-present.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

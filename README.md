@@ -1,12 +1,32 @@
-# simple-mpv-webui
+# elm-mpv-webui
 ...is a web based user interface with controls for the [mpv mediaplayer](https://mpv.io/).
 
 ## Usage
-To use it, simply copy `webui.lua` and the `webui-page`-folder to `~/.config/mpv/scripts/`, mpv will then run it 
-automatically.
 
-Alternatively you can also use the `--script` option from mpv or add something like 
-`scripts-add=/path/to/simple-mpv-webui/webui.lua` to `mpv.conf`.
+### Elm
+
+Install elm https://guide.elm-lang.org/install/elm.html then run:
+
+`elm make webui-page/src/Main.elm --output webui-page/webui.js`
+
+### Lua
+
+Tested on Ubuntu 19.10.
+
+```bash
+$ mkdir -p ~/.config/mpv/scripts
+$ cd ~/.config/mpv/scripts
+$ git clone https://github.com/rofrol/elm-mpv-webui
+$ ln -s simple-mpv-webui/webui.lua .
+$ ln -s simple-mpv-webui/webui-page/ .
+$ sudo apt install lua5.2 lua5.2-dev luarocks
+$ sudo luarocks install luasocket
+```
+
+Alternatively you can also use the `--script` option from mpv or add something like
+`scripts-add=/path/to/elm-mpv-webui/webui.lua` to `mpv.conf`.
+
+### Web browser
 
 You can access the webui when accessing [http://127.0.0.1:8080](http://127.0.0.1:8080) or
 [http://[::1]:8080](http://[::1]:8080) in your webbrowser.
@@ -64,7 +84,7 @@ webui-logging=yes
 ```
 
 #### audio-devices (string)
-Set the audio-devices used for cycling. By default it uses all interfaces MPV 
+Set the audio-devices used for cycling. By default it uses all interfaces MPV
 knows of.
 
 You can see a list of them with following command:
@@ -197,7 +217,7 @@ information about the error.
 ```
 
 ## Thanks
-Thanks to [makedin](https://github.com/makedin) for his work on this.
+Thanks to [open-dynaMIX](https://github.com/open-dynaMIX) and [makedin](https://github.com/makedin) for their work on this.
 
 ## Differences to mpv-web-ui
  - More media controls
