@@ -14,6 +14,7 @@ type Msg
     = PointerDownMsg Coords
     | PointerMoveMsg Coords
     | PointerUpMsg Coords
+    | PointerCancelMsg
 
 
 view : String -> Bool -> Theme -> Maybe Browser.Dom.Element -> Int -> Element Msg
@@ -30,7 +31,8 @@ view id pointerDown theme maybePositionElement position =
 
         pointerAttrs =
             List.concat
-                [ if pointerDown then
+                [ [ onPointerCancel PointerCancelMsg ]
+                , if pointerDown then
                     [ onPointerMoveCoords PointerMoveMsg
                     , onPointerUpCoords PointerUpMsg
                     ]
@@ -79,6 +81,11 @@ onPointerMoveCoords msg =
 onPointerUpCoords : (Coords -> msg) -> Attribute msg
 onPointerUpCoords msg =
     Html.Events.on "pointerup" (D.map msg localCoords) |> Element.htmlAttribute
+
+
+onPointerCancel : msg -> Attribute msg
+onPointerCancel msg =
+    Html.Events.on "pointercancel" (D.succeed msg) |> Element.htmlAttribute
 
 
 localCoords : Decoder Coords

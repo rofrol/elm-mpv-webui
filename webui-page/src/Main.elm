@@ -27,6 +27,7 @@ type alias Model =
     { status : Status
     , position : Int
     , positionPrev : Int
+    , positionTemp : Int
     , maybePositionElement : Maybe Browser.Dom.Element
     , positionPointerDown : Bool
     , positionPointerDownTimer : Int
@@ -114,6 +115,7 @@ initialModel =
     { status = initStatus
     , position = 0
     , positionPrev = 0
+    , positionTemp = 0
     , maybePositionElement = Nothing
     , positionPointerDown = False
     , positionPointerDownTimer = sliderTimerMax
@@ -642,7 +644,7 @@ update msg model =
                                 Nothing ->
                                     0
                     in
-                    ( { model | positionPointerDown = True, positionPrev = model.position, position = position }, Cmd.none )
+                    ( { model | positionPointerDown = True, positionPrev = model.position, positionTemp = position }, Cmd.none )
 
                 Slider.PointerMoveMsg coords ->
                     let
@@ -654,31 +656,42 @@ update msg model =
                                 Nothing ->
                                     0
                     in
-                    ( { model | position = position }
-                    , if model.positionPointerDownTimer == 0 then
-                        send ("set_position/" ++ String.fromFloat ((toFloat position / 100) * toFloat model.status.duration))
+                    if sliderTimerMax - model.positionPointerDownTimer > 1 then
+                        ( { model | position = position }
+                        , if model.positionPointerDownTimer == 0 then
+                            send ("set_position/" ++ String.fromFloat ((toFloat position / 100) * toFloat model.status.duration))
 
-                      else
-                        Cmd.none
-                    )
-
-                Slider.PointerUpMsg coords ->
-                    if model.positionPointerDownTimer == 0 then
-                        let
-                            position =
-                                case model.maybePositionElement of
-                                    Just element ->
-                                        round <| 100 * toFloat coords.x / element.element.width
-
-                                    Nothing ->
-                                        0
-                        in
-                        ( { model | positionPointerDown = False, positionPointerDownTimer = sliderTimerMax, position = position }
-                        , send ("set_position/" ++ String.fromFloat ((toFloat position / 100) * toFloat model.status.duration))
+                          else
+                            Cmd.none
                         )
 
                     else
+                        ( model, Cmd.none )
+
+                Slider.PointerUpMsg coords ->
+                    let
+                        position =
+                            case model.maybePositionElement of
+                                Just element ->
+                                    round <| 100 * toFloat coords.x / element.element.width
+
+                                Nothing ->
+                                    0
+                    in
+                    if sliderTimerMax - model.positionPointerDownTimer > 1 then
+                        if model.positionPointerDownTimer == 0 then
+                            ( { model | positionPointerDown = False, positionPointerDownTimer = sliderTimerMax, position = position }
+                            , send ("set_position/" ++ String.fromFloat ((toFloat position / 100) * toFloat model.status.duration))
+                            )
+
+                        else
+                            ( { model | positionTemp = position }, Cmd.none )
+
+                    else
                         ( { model | positionPointerDown = False, positionPointerDownTimer = sliderTimerMax, position = model.positionPrev }, Cmd.none )
+
+                Slider.PointerCancelMsg ->
+                    ( { model | positionPointerDown = False, positionPointerDownTimer = sliderTimerMax, position = model.positionPrev }, Cmd.none )
 
         VolumeMsg subMsg ->
             case subMsg of
@@ -729,6 +742,9 @@ update msg model =
 
                     else
                         ( { model | volumePointerDown = False, volumePointerDownTimer = sliderTimerMax, volume = model.volumePrev }, Cmd.none )
+
+                Slider.PointerCancelMsg ->
+                    ( { model | volumePointerDown = False, volumePointerDownTimer = sliderTimerMax, volume = model.volumePrev }, Cmd.none )
 
         GetPositionElement result ->
             ( { model | maybePositionElement = Result.toMaybe result }, Cmd.none )
@@ -847,8 +863,15 @@ update msg model =
 
                     else
                         model_
+
+                model___ =
+                    if sliderTimerMax - model__.positionPointerDownTimer > 0 then
+                        { model__ | position = model__.positionTemp }
+
+                    else
+                        model__
             in
-            ( model__, getStatus )
+            ( model___, getStatus )
 
 
 send command =
