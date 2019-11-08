@@ -4,7 +4,7 @@ import Browser.Dom
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
-import Html.Attributes
+import Html.Attributes as HtmlA
 import Html.Events
 import Json.Decode as D exposing (Decoder)
 import Types exposing (..)
@@ -45,8 +45,10 @@ view id pointerDown theme maybePositionElement position =
         , Border.color theme.borderColor
         , Border.width theme.sliderBorderWidth
         , Border.rounded theme.borderRounded
+        , HtmlA.style "-webkit-user-select" "none" |> htmlAttribute
+        , HtmlA.style "user-select" "none" |> htmlAttribute
         ]
-        (el [ width fill, height fill, Html.Attributes.id id |> Element.htmlAttribute ]
+        (el [ width fill, height fill, HtmlA.id id |> Element.htmlAttribute ]
             (el
                 ([ width fill
                  , height fill

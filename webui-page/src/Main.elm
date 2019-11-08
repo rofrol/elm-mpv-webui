@@ -10,7 +10,7 @@ import Element.Font as Font
 import Element.Input as Input
 import FontAwesome.Icon as Icon
 import FontAwesome.Solid as Icon
-import Html.Attributes
+import Html.Attributes as HtmlA
 import Http
 import Json.Decode as D
 import Slider
@@ -157,7 +157,7 @@ home model =
         , paragraph
             [ Font.color model.theme.color
             , Font.size 40
-            , Html.Attributes.style "word-break" "break-all" |> htmlAttribute
+            , HtmlA.style "word-break" "break-all" |> htmlAttribute
             ]
             [ text model.status.filename ]
         , el
@@ -196,7 +196,12 @@ home model =
                     (text (seconds2HHMMSS model.status.duration))
                 )
             ]
-        , el [ Font.color Colors.white ] (text (String.fromInt model.positionPointerDownTimer))
+        , el
+            [ Font.color Colors.white
+            , HtmlA.style "-webkit-user-select" "none" |> htmlAttribute
+            , HtmlA.style "user-select" "none" |> htmlAttribute
+            ]
+            (el [] (text (String.fromInt model.positionPointerDownTimer)))
         , Slider.view positionId
             model.positionPointerDown
             model.theme
@@ -226,7 +231,12 @@ home model =
                 ]
                 (el [ alignRight, width (px 50), height (px 50) ] (icon model.theme False Icon.volumeUp))
             ]
-        , el [ Font.color Colors.white ] (text (String.fromInt model.volumePointerDownTimer))
+        , el
+            [ Font.color Colors.white
+            , HtmlA.style "-webkit-user-select" "none" |> htmlAttribute
+            , HtmlA.style "user-select" "none" |> htmlAttribute
+            ]
+            (el [] (text (String.fromInt model.volumePointerDownTimer)))
         , Slider.view volumeId
             model.volumePointerDown
             model.theme
@@ -410,7 +420,7 @@ playlist model =
                                     )
                                 )
                             , paragraph
-                                [ Html.Attributes.style "word-break" "break-all" |> htmlAttribute
+                                [ HtmlA.style "word-break" "break-all" |> htmlAttribute
                                 , Font.size 30
                                 ]
                                 [ text <|
@@ -448,7 +458,7 @@ colorToRgbaAttr color =
         rgb =
             [ red, green, blue ] |> List.map ((*) 255 >> String.fromFloat) |> List.intersperse ", " |> List.foldl (++) ""
     in
-    Html.Attributes.style "color" ("rgba(" ++ rgb ++ "," ++ String.fromFloat alpha ++ ")")
+    HtmlA.style "color" ("rgba(" ++ rgb ++ "," ++ String.fromFloat alpha ++ ")")
 
 
 focusStyle_ : FocusStyle
