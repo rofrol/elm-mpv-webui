@@ -13,7 +13,7 @@ import Types exposing (..)
 type Msg
     = PointerDownMsg Coords
     | PointerMoveMsg Coords
-    | PointerUpMsg
+    | PointerUpMsg Coords
 
 
 view : String -> Bool -> Theme -> Maybe Browser.Dom.Element -> Int -> Element Msg
@@ -74,9 +74,9 @@ onPointerMoveCoords msg =
     Html.Events.on "pointermove" (D.map msg localCoords) |> Element.htmlAttribute
 
 
-onPointerUpCoords : msg -> Attribute msg
+onPointerUpCoords : (Coords -> msg) -> Attribute msg
 onPointerUpCoords msg =
-    Html.Events.on "pointerup" (D.succeed msg) |> Element.htmlAttribute
+    Html.Events.on "pointerup" (D.map msg localCoords) |> Element.htmlAttribute
 
 
 localCoords : Decoder Coords

@@ -2,6 +2,7 @@ module Main exposing (..)
 
 import Browser
 import Browser.Dom
+import Colors
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -18,14 +19,22 @@ import Time
 import Types exposing (..)
 
 
+sliderTimerMax =
+    2
+
+
 type alias Model =
     { status : Status
     , position : Int
+    , positionPrev : Int
     , maybePositionElement : Maybe Browser.Dom.Element
     , positionPointerDown : Bool
+    , positionPointerDownTimer : Int
     , volume : Int
+    , volumePrev : Int
     , maybeVolumeElement : Maybe Browser.Dom.Element
     , volumePointerDown : Bool
+    , volumePointerDownTimer : Int
     , theme : Theme
     , subsSelected : Int
     , subsCount : Int
@@ -104,11 +113,15 @@ initialModel : Model
 initialModel =
     { status = initStatus
     , position = 0
+    , positionPrev = 0
     , maybePositionElement = Nothing
     , positionPointerDown = False
+    , positionPointerDownTimer = sliderTimerMax
     , volume = 0
+    , volumePrev = 0
     , maybeVolumeElement = Nothing
     , volumePointerDown = False
+    , volumePointerDownTimer = sliderTimerMax
     , theme = themeColorful
     , subsSelected = 0
     , subsCount = 0
@@ -183,6 +196,7 @@ home model =
                     (text (seconds2HHMMSS model.status.duration))
                 )
             ]
+        , el [ Font.color Colors.white ] (text (String.fromInt model.positionPointerDownTimer))
         , Slider.view positionId
             model.positionPointerDown
             model.theme
@@ -212,6 +226,7 @@ home model =
                 ]
                 (el [ alignRight, width (px 50), height (px 50) ] (icon model.theme False Icon.volumeUp))
             ]
+        , el [ Font.color Colors.white ] (text (String.fromInt model.volumePointerDownTimer))
         , Slider.view volumeId
             model.volumePointerDown
             model.theme
@@ -617,9 +632,7 @@ update msg model =
                                 Nothing ->
                                     0
                     in
-                    ( { model | positionPointerDown = True, position = position }
-                    , send ("set_position/" ++ String.fromFloat ((toFloat position / 100) * toFloat model.status.duration))
-                    )
+                    ( { model | positionPointerDown = True, positionPrev = model.position, position = position }, Cmd.none )
 
                 Slider.PointerMoveMsg coords ->
                     let
@@ -632,11 +645,30 @@ update msg model =
                                     0
                     in
                     ( { model | position = position }
-                    , send ("set_position/" ++ String.fromFloat ((toFloat position / 100) * toFloat model.status.duration))
+                    , if model.positionPointerDownTimer == 0 then
+                        send ("set_position/" ++ String.fromFloat ((toFloat position / 100) * toFloat model.status.duration))
+
+                      else
+                        Cmd.none
                     )
 
-                Slider.PointerUpMsg ->
-                    ( { model | positionPointerDown = False }, Cmd.none )
+                Slider.PointerUpMsg coords ->
+                    if model.positionPointerDownTimer == 0 then
+                        let
+                            position =
+                                case model.maybePositionElement of
+                                    Just element ->
+                                        round <| 100 * toFloat coords.x / element.element.width
+
+                                    Nothing ->
+                                        0
+                        in
+                        ( { model | positionPointerDown = False, positionPointerDownTimer = sliderTimerMax, position = position }
+                        , send ("set_position/" ++ String.fromFloat ((toFloat position / 100) * toFloat model.status.duration))
+                        )
+
+                    else
+                        ( { model | positionPointerDown = False, positionPointerDownTimer = sliderTimerMax, position = model.positionPrev }, Cmd.none )
 
         VolumeMsg subMsg ->
             case subMsg of
@@ -650,9 +682,7 @@ update msg model =
                                 Nothing ->
                                     0
                     in
-                    ( { model | volumePointerDown = True, volume = volume }
-                    , send ("set_volume/" ++ String.fromFloat ((toFloat volume / 100) * toFloat model.status.volumeMax))
-                    )
+                    ( { model | volumePointerDown = True, volumePrev = model.volume, volume = volume }, Cmd.none )
 
                 Slider.PointerMoveMsg coords ->
                     let
@@ -665,11 +695,30 @@ update msg model =
                                     0
                     in
                     ( { model | volume = volume }
-                    , send ("set_volume/" ++ String.fromFloat ((toFloat volume / 100) * toFloat model.status.volumeMax))
+                    , if model.volumePointerDownTimer == 0 then
+                        send ("set_volume/" ++ String.fromFloat ((toFloat volume / 100) * toFloat model.status.volumeMax))
+
+                      else
+                        Cmd.none
                     )
 
-                Slider.PointerUpMsg ->
-                    ( { model | volumePointerDown = False }, Cmd.none )
+                Slider.PointerUpMsg coords ->
+                    if model.volumePointerDownTimer == 0 then
+                        let
+                            volume =
+                                case model.maybeVolumeElement of
+                                    Just element ->
+                                        round <| 100 * toFloat coords.x / element.element.width
+
+                                    Nothing ->
+                                        0
+                        in
+                        ( { model | volumePointerDown = False, volumePointerDownTimer = sliderTimerMax, volume = volume }
+                        , send ("set_volume/" ++ String.fromFloat ((toFloat volume / 100) * toFloat model.status.volumeMax))
+                        )
+
+                    else
+                        ( { model | volumePointerDown = False, volumePointerDownTimer = sliderTimerMax, volume = model.volumePrev }, Cmd.none )
 
         GetPositionElement result ->
             ( { model | maybePositionElement = Result.toMaybe result }, Cmd.none )
@@ -774,7 +823,22 @@ update msg model =
             )
 
         Tick _ ->
-            ( model, getStatus )
+            let
+                model_ =
+                    if model.positionPointerDown && model.positionPointerDownTimer > 0 then
+                        { model | positionPointerDownTimer = model.positionPointerDownTimer - 1 }
+
+                    else
+                        model
+
+                model__ =
+                    if model_.volumePointerDown && model_.volumePointerDownTimer > 0 then
+                        { model_ | volumePointerDownTimer = model_.volumePointerDownTimer - 1 }
+
+                    else
+                        model_
+            in
+            ( model__, getStatus )
 
 
 send command =
