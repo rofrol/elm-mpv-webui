@@ -876,7 +876,7 @@ update msg model =
 
 send command =
     Http.post
-        { url = "http://192.168.0.10:8080/api/" ++ command
+        { url = "api/" ++ command
         , body = Http.emptyBody
         , expect = Http.expectJson Sent D.value
         }
@@ -884,7 +884,7 @@ send command =
 
 getStatus =
     Http.get
-        { url = "http://192.168.0.10:8080/api/status"
+        { url = "api/status"
         , expect = Http.expectJson GotStatus statusDecoder
         }
 

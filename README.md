@@ -43,17 +43,17 @@ Use `mpvdir` script from this repo:
 
 ### Web browser
 
-You can access the webui when accessing [http://127.0.0.1:8080](http://127.0.0.1:8080) or
-[http://[::1]:8080](http://[::1]:8080) in your webbrowser.
+You can access the webui when accessing [http://127.0.0.1:8888](http://127.0.0.1:8888) or
+[http://[::1]:8888](http://[::1]:8888) in your webbrowser.
 
-By default it listens on `0.0.0.0:8080` and `[::0]:8080`. As described below, this can be changed.
+By default it listens on `0.0.0.0:8888` and `[::0]:8888`. As described below, this can be changed.
 
 ### Options
 Options can be set with [--script-opts](https://mpv.io/manual/master/#options-script-opts)
 with the prefix `webui-`.
 
 #### port (int)
-Set the port to serve the webui (default: 8080). Setting this allows for
+Set the port to serve the webui (default: 8888). Setting this allows for
 running multiple instances on different ports.
 
 Example:
@@ -228,7 +228,7 @@ Thanks to [open-dynaMIX](https://github.com/open-dynaMIX) and [makedin](https://
  - Playlist controls
  - Some styles and font-awesome
  - ipv6 support
- - Option to set the port being used (defaults to 8080)
+ - Option to set the port being used (defaults to 8888)
  - Using the Media Session API
 
 ## Warning
