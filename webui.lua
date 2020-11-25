@@ -768,7 +768,12 @@ if passwd ~= 1 then
       listen_string = listen_string .. server.listen
     end
 
-    local startup_msg = ("v" .. VERSION .. "\n" .. listen_string)
+    -- https://stackoverflow.com/questions/7046291/get-ip-address-in-lua/8979647#8979647
+    local s = socket.udp()
+    s:setpeername("74.125.115.104", 80)
+    local ip, _ = s:getsockname()
+
+    local startup_msg = ("v" .. VERSION .. "\n" .. listen_string .. "\nIP " .. ip)
     message = function() log_osd(startup_msg) end
     mp.msg.info(startup_msg)
     if passwd  ~= nil then
