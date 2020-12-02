@@ -605,10 +605,15 @@ if passwd ~= 1 then
     s:setpeername("91.198.174.192", 80)
     local ip, _ = s:getsockname()
 
+    local s2 = socket.udp()
+    s2:setpeername("2620:0:862:ed1a::1", 80)
+    local ipv6, _ = s2:getsockname()
+    
     startup_msg = ("v" .. VERSION .. "\nServing on "
             .. concatkeys(servers, ':' .. options.port .. ' and ')
             .. ":" .. options.port
-            .. "\nIP " .. ip
+            .. "\nIPv4 " .. ip
+            .. "\nIPv6 " .. ipv6
     )
     message = function() mp.osd_message(MSG_PREFIX .. startup_msg, 5) end
     mp.msg.info(startup_msg)
